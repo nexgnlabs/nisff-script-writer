@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro</title>
+    <title>NISFF Script Writer Pro v2.1</title>
     <style>
         :root {
             --primary: #d4af37; /* Festival Gold */
@@ -42,8 +42,8 @@
         .tab-content.active { display: block; }
 
         /* Inputs & Grid */
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .full-width { grid-column: span 2; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .full-width { grid-column: span 3; }
         
         label { display: block; font-size: 12px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
         input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
@@ -66,7 +66,7 @@
 
 <div class="app-shell">
     <div class="header">
-        <h1>NISFF Script Writer Pro</h1>
+        <h1>NISFF Script Writer Pro v2.1</h1>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
     </div>
 
@@ -78,11 +78,39 @@
         <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Script</button>
     </div>
 
+    <datalist id="languageOptions">
+        <option value="English">English (Global)</option>
+        <option value="Hindi">Hindi (हिन्दी)</option>
+        <option value="Marathi">Marathi (मराठी)</option>
+        <option value="Bengali">Bengali (বাংলা)</option>
+        <option value="Tamil">Tamil (தமிழ்)</option>
+        <option value="Telugu">Telugu (తెలుగు)</option>
+        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+        <option value="Malayalam">Malayalam (മലയാളം)</option>
+        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+        <option value="Urdu">Urdu (اردو)</option>
+        <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
+        <option value="Assamese">Assamese (অসমীয়া)</option>
+        <option value="Bhojpuri">Bhojpuri (भोजपुरी)</option>
+        
+        <option value="Spanish">Spanish (Español)</option>
+        <option value="French">French (Français)</option>
+        <option value="German">German (Deutsch)</option>
+        <option value="Chinese (Mandarin)">Chinese (中文)</option>
+        <option value="Japanese">Japanese (日本語)</option>
+        <option value="Korean">Korean (한국어)</option>
+        <option value="Russian">Russian (Русский)</option>
+        <option value="Arabic">Arabic (العربية)</option>
+        <option value="Portuguese">Portuguese (Português)</option>
+        <option value="Italian">Italian (Italiano)</option>
+    </datalist>
+
     <div id="film" class="tab-content active">
         <div class="input-grid">
             <div class="full-width">
-                <label>Movie Idea / Logline</label>
-                <textarea id="filmIdea" rows="3" placeholder="e.g. A time traveler tries to save his wife but keeps making it worse..."></textarea>
+                <label>Movie Idea / Logline (Idea will be used as Title)</label>
+                <textarea id="filmIdea" rows="3" placeholder="e.g. The Last Train Home"></textarea>
             </div>
             <div>
                 <label>Genre</label>
@@ -103,6 +131,10 @@
                     <option value="35 minutes">35 Minutes</option>
                     <option value="40 minutes">40 Minutes</option>
                 </select>
+            </div>
+            <div>
+                <label>Script Language</label>
+                <input list="languageOptions" id="filmLanguage" placeholder="Type or Select Language">
             </div>
         </div>
         <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + POSTER</button>
@@ -131,7 +163,7 @@
     <div id="poster" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Script Summary (Or auto-filled)</label>
+                <label>Script Summary/Title (Or auto-filled)</label>
                 <textarea id="posterContext" rows="2" placeholder="Summary for poster..."></textarea>
             </div>
         </div>
@@ -150,7 +182,7 @@
                 <input type="text" id="miniTopic" placeholder="e.g. 5 Tips for Filmmakers">
             </div>
             <div>
-                <label>Duration (Seconds)</label>
+                <label>Duration</label>
                 <select id="miniDuration">
                     <option>20 Seconds</option><option>25 Seconds</option><option>30 Seconds</option>
                     <option>35 Seconds</option><option>40 Seconds</option><option>45 Seconds</option>
@@ -165,6 +197,10 @@
                     <option>Cinematic Montage</option>
                     <option>Comedy Skit</option>
                 </select>
+            </div>
+            <div>
+                <label>Language</label>
+                <input list="languageOptions" id="miniLanguage" placeholder="Select Language">
             </div>
         </div>
         <button class="action-btn" onclick="generateMini()">GENERATE REEL SCRIPT</button>
@@ -199,6 +235,10 @@
                     <option>Storytime</option>
                 </select>
             </div>
+            <div>
+                <label>Language</label>
+                <input list="languageOptions" id="ytLanguage" placeholder="Select Language">
+            </div>
         </div>
         <button class="action-btn" onclick="generateYouTube()">GENERATE YOUTUBE SCRIPT</button>
         <div id="ytLoader" class="loader">Writing Script...</div>
@@ -213,10 +253,15 @@
 <script>
     // --- State & Utility ---
     let lastGeneratedScript = ""; 
+    let globalLang = "English";
 
     window.onload = () => {
         const key = localStorage.getItem('nisff_key');
         if (key) document.getElementById('apiKey').value = key;
+        
+        document.getElementById('filmLanguage').value = "English";
+        document.getElementById('miniLanguage').value = "English";
+        document.getElementById('ytLanguage').value = "English";
     };
 
     function openTab(id) {
@@ -224,12 +269,11 @@
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         
         document.getElementById(id).classList.add('active');
-        // Find button that calls this function to add active class
         const buttons = document.querySelectorAll('.tab-btn');
         buttons.forEach(btn => {
             if(btn.getAttribute('onclick').includes(id)) {
                 btn.classList.add('active');
-                btn.classList.remove('has-data'); // Remove dot when viewed
+                btn.classList.remove('has-data');
             }
         });
     }
@@ -250,39 +294,43 @@
         if(!key) { alert("Please enter API Key"); return null; }
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`, {
+            // Using Gemini Pro for better instruction following on specific prompt formats
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.7 } 
+                })
             });
             const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
+            return data.candidates[0].content.parts[0].text.trim();
         } catch (e) {
             alert("Error: " + e.message);
             return null;
         }
     }
 
-    // --- 1. Short Film Generator (Triggers 2 & 3) ---
+    // --- 1. Short Film Generator ---
     async function generateFilm() {
         const idea = document.getElementById('filmIdea').value;
         const genre = document.getElementById('filmGenre').value;
         const dur = document.getElementById('filmDuration').value;
+        const lang = document.getElementById('filmLanguage').value;
+        globalLang = lang;
         
-        if(!idea) return alert("Enter an idea first!");
+        if(!idea) return alert("Enter an idea/title first!");
 
-        // UI Updates
         document.getElementById('filmLoader').style.display = 'block';
         document.getElementById('filmOutput').innerText = "";
 
         const prompt = `Act as a Professional Screenwriter for NISFF.
-        Write a Short Film Script.
-        Title/Idea: ${idea}
+        Write a Short Film Script in **${lang}**.
+        Title/Concept: ${idea}
         Genre: ${genre}
         Target Duration: ${dur}
         
-        Format: Standard Screenplay Format (Scene Headings, Action, Character, Dialogue).
-        Ensure proper pacing for ${dur}. Include detailed visual descriptions.`;
+        Format: Standard Screenplay Format.`;
 
         const script = await callGemini(prompt);
         
@@ -290,112 +338,99 @@
             document.getElementById('filmLoader').style.display = 'none';
             document.getElementById('filmOutput').innerText = script;
             
-            // Store context for other tabs
             lastGeneratedScript = script;
-            document.getElementById('diaContext').value = `Based on this script: ${idea} (${genre})`;
-            document.getElementById('posterContext').value = `Movie: ${idea} - ${genre}`;
+            document.getElementById('diaContext').value = `Based on script: ${idea} (${genre}) in ${lang}`;
+            // Passing idea as title for poster
+            document.getElementById('posterContext').value = idea; 
 
-            // Trigger Background Generators
-            autoGenerateDialogue(script);
+            autoGenerateDialogue(script, lang);
             autoGeneratePoster(idea, genre);
         }
     }
 
-    // --- 2. Auto Dialogue Generator ---
-    async function autoGenerateDialogue(fullScript) {
-        // UI Indicator for background work
+    // --- 2. Dialogue Generator ---
+    async function autoGenerateDialogue(fullScript, lang) {
         const btn = document.getElementById('btn-dialogue');
-        
-        const prompt = `Act as a Dialogue Doctor. Based on this script summary/content:
-        "${fullScript.substring(0, 2000)}..." (Context)
-        
-        Extract or Rewrite the 3 most impactful dialogue exchanges from this film. 
-        Focus on subtext, emotional depth, and realistic flow. 
-        Format as Character Name: Dialogue.`;
-
+        const prompt = `Based on this script: "${fullScript.substring(0, 1000)}...". Extract 3 key dialogue exchanges in **${lang}**. Format: Character: [Dialogue].`;
         const res = await callGemini(prompt);
         if (res) {
             document.getElementById('diaOutput').innerText = res;
-            btn.classList.add('has-data'); // Add Blinking Dot
+            btn.classList.add('has-data');
         }
     }
 
-    // Manual Dialogue Gen
     async function generateDialogue() {
         const context = document.getElementById('diaContext').value;
-        if(!context) return alert("Enter context!");
-        document.getElementById('diaLoader').style.display = 'block';
-        
         const prompt = `Write intense movie dialogue based on: ${context}. Format as screenplay.`;
+        document.getElementById('diaLoader').style.display = 'block';
         const res = await callGemini(prompt);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) document.getElementById('diaOutput').innerText = res;
     }
 
-    // --- 3. Auto Poster Generator ---
-    async function autoGeneratePoster(idea, genre) {
+    // --- 3. Poster Generator (UPDATED LOGIC) ---
+    async function autoGeneratePoster(title, genre) {
         const btn = document.getElementById('btn-poster');
         
-        const prompt = `Act as a Visual Artist. Create 3 Midjourney/DALL-E prompts for a Movie Poster.
-        Movie Concept: ${idea}
+        // Strict prompt to ensure exact output format
+        const prompt = `You are a tool that generates exact image prompts.
+        Task: Create ONE single high-quality AI image prompt for a movie poster.
+        Movie Title/Concept: ${title}
         Genre: ${genre}
-        
-        Style: Cinematic, High Contrast, Festival Award Winning style.
-        Output: Just the prompts.`;
+        Style: Cinematic, Award-Winning Festival Poster.
+
+        CRITICAL INSTRUCTION: The final output must start exactly with the phrase "generate a poster image of " followed by the description. Do not add any introductory text like "Here is the prompt:". Output ONLY the final prompt string.`;
 
         const res = await callGemini(prompt);
         if (res) {
             document.getElementById('posterOutput').innerText = res;
-            btn.classList.add('has-data'); // Add Blinking Dot
+            btn.classList.add('has-data');
         }
     }
 
-    // Manual Poster Gen
     async function generatePoster() {
         const ctx = document.getElementById('posterContext').value;
-        if(!ctx) return alert("Enter summary!");
+        if(!ctx) return alert("Enter title/summary!");
         document.getElementById('posterLoader').style.display = 'block';
-        const res = await callGemini(`Create movie poster prompts for: ${ctx}`);
+        
+        // Strict prompt for manual generation too
+        const prompt = `You are a tool that generates exact image prompts.
+        Task: Create ONE single high-quality AI image prompt for a movie poster based on this summary: "${ctx}".
+        CRITICAL INSTRUCTION: The final output must start exactly with the phrase "generate a poster image of " followed by the description reflecting the summary and title if present. Output ONLY the final prompt string.`;
+
+        const res = await callGemini(prompt);
         document.getElementById('posterLoader').style.display = 'none';
         if(res) document.getElementById('posterOutput').innerText = res;
     }
 
-    // --- 4. Mini Video (Separate Logic) ---
+    // --- 4. Mini Video ---
     async function generateMini() {
         const topic = document.getElementById('miniTopic').value;
         const dur = document.getElementById('miniDuration').value;
         const style = document.getElementById('miniStyle').value;
+        const lang = document.getElementById('miniLanguage').value;
 
         if(!topic) return alert("Enter topic!");
         document.getElementById('miniLoader').style.display = 'block';
 
-        const prompt = `Act as a Viral Content Creator. Write a script for a ${dur} vertical video (Reels/Shorts).
-        Topic: ${topic}
-        Style: ${style}
-        Structure:
-        0-3s: Hook
-        Body: Content
-        End: CTA`;
+        const prompt = `Write a ${dur} vertical video script (Reels/Shorts) in **${lang}**. Topic: ${topic}. Style: ${style}. Structure: Hook, Body, CTA.`;
 
         const res = await callGemini(prompt);
         document.getElementById('miniLoader').style.display = 'none';
         if(res) document.getElementById('miniOutput').innerText = res;
     }
 
-    // --- 5. YouTube Script (Separate Logic) ---
+    // --- 5. YouTube Script ---
     async function generateYouTube() {
         const topic = document.getElementById('ytTopic').value;
         const dur = document.getElementById('ytDuration').value;
         const cat = document.getElementById('ytCategory').value;
+        const lang = document.getElementById('ytLanguage').value;
 
         if(!topic) return alert("Enter title!");
         document.getElementById('ytLoader').style.display = 'block';
 
-        const prompt = `Act as a YouTuber. Write a script for a ${dur} video.
-        Title: ${topic}
-        Category: ${cat}
-        
-        Include: Intro, Hook, Main Content Points (Detailed), Sponsor Spot (Placeholder), Outro.`;
+        const prompt = `Write a ${dur} YouTube video script in **${lang}**. Title: ${topic}. Category: ${cat}. Include Intro, Hook, Content, Outro.`;
 
         const res = await callGemini(prompt);
         document.getElementById('ytLoader').style.display = 'none';
