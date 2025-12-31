@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v2.1</title>
+    <title>NISFF Script Writer Pro (Flash-Lite)</title>
     <style>
         :root {
             --primary: #d4af37; /* Festival Gold */
@@ -11,7 +11,8 @@
             --card: #141414;
             --text: #e0e0e0;
             --border: #333;
-            --success: #00e676; /* Green for dots */
+            --success: #00e676;
+            --error: #ff5252;
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
@@ -57,8 +58,9 @@
         /* Output Boxes */
         .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 20px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
         
-        /* Loader */
+        /* Loader & Error */
         .loader { display: none; text-align: center; color: var(--primary); margin-top: 20px; font-weight: bold; }
+        .error-msg { display: none; background: rgba(255, 82, 82, 0.1); border: 1px solid var(--error); color: var(--error); padding: 15px; border-radius: 6px; margin-top: 15px; text-align: center; }
 
     </style>
 </head>
@@ -66,7 +68,7 @@
 
 <div class="app-shell">
     <div class="header">
-        <h1>NISFF Script Writer Pro v2.1</h1>
+        <h1>NISFF Script Writer Pro (Lite)</h1>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
     </div>
 
@@ -79,37 +81,30 @@
     </div>
 
     <datalist id="languageOptions">
-        <option value="English">English (Global)</option>
+        <option value="English">English</option>
         <option value="Hindi">Hindi (हिन्दी)</option>
         <option value="Marathi">Marathi (मराठी)</option>
-        <option value="Bengali">Bengali (বাংলা)</option>
-        <option value="Tamil">Tamil (தமிழ்)</option>
-        <option value="Telugu">Telugu (తెలుగు)</option>
-        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-        <option value="Malayalam">Malayalam (മലയാളം)</option>
-        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-        <option value="Urdu">Urdu (اردو)</option>
-        <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
-        <option value="Assamese">Assamese (অসমীয়া)</option>
-        <option value="Bhojpuri">Bhojpuri (भोजपुरी)</option>
-        
-        <option value="Spanish">Spanish (Español)</option>
-        <option value="French">French (Français)</option>
-        <option value="German">German (Deutsch)</option>
-        <option value="Chinese (Mandarin)">Chinese (中文)</option>
-        <option value="Japanese">Japanese (日本語)</option>
-        <option value="Korean">Korean (한국어)</option>
-        <option value="Russian">Russian (Русский)</option>
-        <option value="Arabic">Arabic (العربية)</option>
-        <option value="Portuguese">Portuguese (Português)</option>
-        <option value="Italian">Italian (Italiano)</option>
+        <option value="Bengali">Bengali</option>
+        <option value="Tamil">Tamil</option>
+        <option value="Telugu">Telugu</option>
+        <option value="Malayalam">Malayalam</option>
+        <option value="Kannada">Kannada</option>
+        <option value="Gujarati">Gujarati</option>
+        <option value="Punjabi">Punjabi</option>
+        <option value="Spanish">Spanish</option>
+        <option value="French">French</option>
+        <option value="German">German</option>
+        <option value="Chinese">Chinese</option>
+        <option value="Japanese">Japanese</option>
+        <option value="Korean">Korean</option>
+        <option value="Russian">Russian</option>
+        <option value="Arabic">Arabic</option>
     </datalist>
 
     <div id="film" class="tab-content active">
         <div class="input-grid">
             <div class="full-width">
-                <label>Movie Idea / Logline (Idea will be used as Title)</label>
+                <label>Movie Idea / Logline</label>
                 <textarea id="filmIdea" rows="3" placeholder="e.g. The Last Train Home"></textarea>
             </div>
             <div>
@@ -134,11 +129,12 @@
             </div>
             <div>
                 <label>Script Language</label>
-                <input list="languageOptions" id="filmLanguage" placeholder="Type or Select Language">
+                <input list="languageOptions" id="filmLanguage" placeholder="Select Language">
             </div>
         </div>
         <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + POSTER</button>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
+        <div id="filmError" class="error-msg"></div>
         <div class="output-box">
             <button class="copy-btn" onclick="copyText('filmOutput')">Copy</button>
             <div id="filmOutput"></div>
@@ -148,22 +144,22 @@
     <div id="dialogue" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Context (Or auto-filled from Main Script)</label>
-                <textarea id="diaContext" rows="3" placeholder="Paste context here if using separately..."></textarea>
+                <label>Context (Or auto-filled)</label>
+                <textarea id="diaContext" rows="3" placeholder="Paste context here..."></textarea>
             </div>
         </div>
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE ONLY</button>
         <div id="diaLoader" class="loader">CRAFTING DIALOGUES...</div>
         <div class="output-box">
             <button class="copy-btn" onclick="copyText('diaOutput')">Copy</button>
-            <div id="diaOutput">No dialogue generated yet. Create a Main Script first or enter context above.</div>
+            <div id="diaOutput">No dialogue generated yet.</div>
         </div>
     </div>
 
     <div id="poster" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Script Summary/Title (Or auto-filled)</label>
+                <label>Script Summary (Or auto-filled)</label>
                 <textarea id="posterContext" rows="2" placeholder="Summary for poster..."></textarea>
             </div>
         </div>
@@ -193,7 +189,7 @@
                 <label>Style</label>
                 <select id="miniStyle">
                     <option>Trending Audio / Visual</option>
-                    <option>Talking Head (Educational)</option>
+                    <option>Talking Head</option>
                     <option>Cinematic Montage</option>
                     <option>Comedy Skit</option>
                 </select>
@@ -204,7 +200,7 @@
             </div>
         </div>
         <button class="action-btn" onclick="generateMini()">GENERATE REEL SCRIPT</button>
-        <div id="miniLoader" class="loader">Creating Viral Content...</div>
+        <div id="miniLoader" class="loader">Creating...</div>
         <div class="output-box">
             <button class="copy-btn" onclick="copyText('miniOutput')">Copy</button>
             <div id="miniOutput"></div>
@@ -230,7 +226,7 @@
                 <select id="ytCategory">
                     <option>Filmmaking / Tutorial</option>
                     <option>Review / Analysis</option>
-                    <option>Vlog / Behind the Scenes</option>
+                    <option>Vlog</option>
                     <option>Documentary</option>
                     <option>Storytime</option>
                 </select>
@@ -251,7 +247,7 @@
 </div>
 
 <script>
-    // --- State & Utility ---
+    // --- Configuration ---
     let lastGeneratedScript = ""; 
     let globalLang = "English";
 
@@ -267,11 +263,11 @@
     function openTab(id) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
         document.getElementById(id).classList.add('active');
-        const buttons = document.querySelectorAll('.tab-btn');
-        buttons.forEach(btn => {
-            if(btn.getAttribute('onclick').includes(id)) {
+        
+        // Handle button active state
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if(btn.onclick.toString().includes(id)) {
                 btn.classList.add('active');
                 btn.classList.remove('has-data');
             }
@@ -289,24 +285,52 @@
         alert("Copied!");
     }
 
+    // --- ROBUST API CALLER ---
     async function callGemini(prompt) {
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
+        // UPDATED MODEL: gemini-2.5-flash-lite
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
+
         try {
-            // Using Gemini Pro for better instruction following on specific prompt formats
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.7 } 
+                    // Add safety settings to prevent blocks
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                    ]
                 })
             });
+
             const data = await response.json();
-            return data.candidates[0].content.parts[0].text.trim();
+
+            // Check for API errors
+            if (data.error) {
+                console.error("API Error:", data.error);
+                throw new Error("API Error: " + data.error.message);
+            }
+
+            // Check for valid candidates (Prevents the crash)
+            if (!data.candidates || data.candidates.length === 0) {
+                console.warn("No content generated:", data);
+                throw new Error("No content generated. The AI might have blocked the request due to safety policies.");
+            }
+
+            // Return text
+            return data.candidates[0].content.parts[0].text;
+
         } catch (e) {
-            alert("Error: " + e.message);
+            console.error(e);
+            if(!prompt.includes("Dialogues") && !prompt.includes("Poster")) {
+                alert(e.message);
+            }
             return null;
         }
     }
@@ -319,32 +343,41 @@
         const lang = document.getElementById('filmLanguage').value;
         globalLang = lang;
         
-        if(!idea) return alert("Enter an idea/title first!");
+        if(!idea) return alert("Enter an idea first!");
 
-        document.getElementById('filmLoader').style.display = 'block';
-        document.getElementById('filmOutput').innerText = "";
+        const loader = document.getElementById('filmLoader');
+        const errorDiv = document.getElementById('filmError');
+        const output = document.getElementById('filmOutput');
+
+        loader.style.display = 'block';
+        errorDiv.style.display = 'none';
+        output.innerText = "";
 
         const prompt = `Act as a Professional Screenwriter for NISFF.
         Write a Short Film Script in **${lang}**.
         Title/Concept: ${idea}
         Genre: ${genre}
         Target Duration: ${dur}
-        
         Format: Standard Screenplay Format.`;
 
         const script = await callGemini(prompt);
         
+        loader.style.display = 'none';
+
         if (script) {
-            document.getElementById('filmLoader').style.display = 'none';
-            document.getElementById('filmOutput').innerText = script;
-            
+            output.innerText = script;
             lastGeneratedScript = script;
-            document.getElementById('diaContext').value = `Based on script: ${idea} (${genre}) in ${lang}`;
-            // Passing idea as title for poster
+            
+            // Auto fill contexts
+            document.getElementById('diaContext').value = `Based on script: ${idea} (${genre})`;
             document.getElementById('posterContext').value = idea; 
 
+            // Trigger background tasks
             autoGenerateDialogue(script, lang);
             autoGeneratePoster(idea, genre);
+        } else {
+            errorDiv.innerText = "Failed to generate script. Check API Key or try a different topic.";
+            errorDiv.style.display = 'block';
         }
     }
 
@@ -361,25 +394,28 @@
 
     async function generateDialogue() {
         const context = document.getElementById('diaContext').value;
-        const prompt = `Write intense movie dialogue based on: ${context}. Format as screenplay.`;
+        if(!context) return alert("Enter context!");
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(prompt);
+        const res = await callGemini(`Write intense movie dialogue based on: ${context}. Format as screenplay.`);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) document.getElementById('diaOutput').innerText = res;
     }
 
-    // --- 3. Poster Generator (UPDATED LOGIC) ---
+    // --- 3. Poster Generator (SPECIFIC FORMAT) ---
     async function autoGeneratePoster(title, genre) {
         const btn = document.getElementById('btn-poster');
         
-        // Strict prompt to ensure exact output format
-        const prompt = `You are a tool that generates exact image prompts.
-        Task: Create ONE single high-quality AI image prompt for a movie poster.
-        Movie Title/Concept: ${title}
+        // Strict Prompt Engineering
+        const prompt = `You are an AI image prompt generator.
+        Task: Create ONE SINGLE image prompt for a movie poster.
+        Movie Title: "${title}"
         Genre: ${genre}
         Style: Cinematic, Award-Winning Festival Poster.
-
-        CRITICAL INSTRUCTION: The final output must start exactly with the phrase "generate a poster image of " followed by the description. Do not add any introductory text like "Here is the prompt:". Output ONLY the final prompt string.`;
+        
+        CRITICAL RULES:
+        1. Output ONLY the final prompt string.
+        2. The output MUST start with the exact phrase: "generate a poster image of "
+        3. Do NOT add introduction text like "Here is the prompt".`;
 
         const res = await callGemini(prompt);
         if (res) {
@@ -390,13 +426,15 @@
 
     async function generatePoster() {
         const ctx = document.getElementById('posterContext').value;
-        if(!ctx) return alert("Enter title/summary!");
+        if(!ctx) return alert("Enter summary!");
         document.getElementById('posterLoader').style.display = 'block';
         
-        // Strict prompt for manual generation too
-        const prompt = `You are a tool that generates exact image prompts.
-        Task: Create ONE single high-quality AI image prompt for a movie poster based on this summary: "${ctx}".
-        CRITICAL INSTRUCTION: The final output must start exactly with the phrase "generate a poster image of " followed by the description reflecting the summary and title if present. Output ONLY the final prompt string.`;
+        const prompt = `You are an AI image prompt generator.
+        Task: Create ONE SINGLE image prompt for a movie poster based on: "${ctx}".
+        
+        CRITICAL RULES:
+        1. Output ONLY the final prompt string.
+        2. The output MUST start with the exact phrase: "generate a poster image of "`;
 
         const res = await callGemini(prompt);
         document.getElementById('posterLoader').style.display = 'none';
