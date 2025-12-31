@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NISFF Script Writer Pro</title>
+    <style>
+        :root {
+            --primary: #d4af37; /* Festival Gold */
+            --bg: #050505;
+            --card: #141414;
+            --text: #e0e0e0;
+            --border: #333;
+            --success: #00e676; /* Green for dots */
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .app-shell { max-width: 1200px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); min-height: 90vh; display: flex; flex-direction: column; }
+
+        /* Header */
+        .header { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
+        h1 { margin: 0; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        .api-input { background: #000; border: 1px solid var(--primary); color: #fff; padding: 8px 15px; border-radius: 20px; width: 300px; text-align: center; margin-top: 10px; font-family: monospace; }
+
+        /* Navigation Tabs */
+        .nav-tabs { display: flex; gap: 5px; background: #000; padding: 5px; border-radius: 8px; flex-wrap: wrap; }
+        .tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #888; cursor: pointer; font-weight: bold; position: relative; transition: 0.3s; border-radius: 6px; min-width: 120px; }
+        .tab-btn:hover { background: #222; color: #fff; }
+        .tab-btn.active { background: var(--primary); color: #000; }
+
+        /* Blinking Dot Notification */
+        .has-data::after {
+            content: ''; position: absolute; top: 8px; left: 8px;
+            width: 8px; height: 8px; background-color: var(--success);
+            border-radius: 50%; box-shadow: 0 0 5px var(--success);
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Content Sections */
+        .tab-content { display: none; padding-top: 25px; flex-grow: 1; }
+        .tab-content.active { display: block; }
+
+        /* Inputs & Grid */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .full-width { grid-column: span 2; }
+        
+        label { display: block; font-size: 12px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
+
+        /* Buttons */
+        .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.2s; }
+        .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .copy-btn { background: #333; color: #fff; border: 1px solid #555; padding: 5px 15px; border-radius: 4px; cursor: pointer; float: right; font-size: 12px; }
+
+        /* Output Boxes */
+        .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 20px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
+        
+        /* Loader */
+        .loader { display: none; text-align: center; color: var(--primary); margin-top: 20px; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <div class="header">
+        <h1>NISFF Script Writer Pro</h1>
+        <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Script</button>
+        <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
+        <button class="tab-btn" id="btn-poster" onclick="openTab('poster')">🎨 Poster Prompt</button>
+        <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels Video</button>
+        <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Script</button>
+    </div>
+
+    <div id="film" class="tab-content active">
+        <div class="input-grid">
+            <div class="full-width">
+                <label>Movie Idea / Logline</label>
+                <textarea id="filmIdea" rows="3" placeholder="e.g. A time traveler tries to save his wife but keeps making it worse..."></textarea>
+            </div>
+            <div>
+                <label>Genre</label>
+                <select id="filmGenre">
+                    <option>Drama</option><option>Sci-Fi</option><option>Horror</option>
+                    <option>Comedy</option><option>Thriller</option><option>Romance</option>
+                    <option>Experimental</option><option>Documentary</option>
+                </select>
+            </div>
+            <div>
+                <label>Duration</label>
+                <select id="filmDuration">
+                    <option value="10 minutes">10 Minutes</option>
+                    <option value="15 minutes">15 Minutes</option>
+                    <option value="20 minutes">20 Minutes</option>
+                    <option value="25 minutes">25 Minutes</option>
+                    <option value="30 minutes">30 Minutes</option>
+                    <option value="35 minutes">35 Minutes</option>
+                    <option value="40 minutes">40 Minutes</option>
+                </select>
+            </div>
+        </div>
+        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + POSTER</button>
+        <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
+        <div class="output-box">
+            <button class="copy-btn" onclick="copyText('filmOutput')">Copy</button>
+            <div id="filmOutput"></div>
+        </div>
+    </div>
+
+    <div id="dialogue" class="tab-content">
+        <div class="input-grid">
+            <div class="full-width">
+                <label>Context (Or auto-filled from Main Script)</label>
+                <textarea id="diaContext" rows="3" placeholder="Paste context here if using separately..."></textarea>
+            </div>
+        </div>
+        <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE ONLY</button>
+        <div id="diaLoader" class="loader">CRAFTING DIALOGUES...</div>
+        <div class="output-box">
+            <button class="copy-btn" onclick="copyText('diaOutput')">Copy</button>
+            <div id="diaOutput">No dialogue generated yet. Create a Main Script first or enter context above.</div>
+        </div>
+    </div>
+
+    <div id="poster" class="tab-content">
+        <div class="input-grid">
+            <div class="full-width">
+                <label>Script Summary (Or auto-filled)</label>
+                <textarea id="posterContext" rows="2" placeholder="Summary for poster..."></textarea>
+            </div>
+        </div>
+        <button class="action-btn" onclick="generatePoster()">GENERATE VISUAL PROMPT</button>
+        <div id="posterLoader" class="loader">DESIGNING VISUALS...</div>
+        <div class="output-box">
+            <button class="copy-btn" onclick="copyText('posterOutput')">Copy</button>
+            <div id="posterOutput">No prompt yet.</div>
+        </div>
+    </div>
+
+    <div id="mini" class="tab-content">
+        <div class="input-grid">
+            <div class="full-width">
+                <label>Topic / Viral Idea</label>
+                <input type="text" id="miniTopic" placeholder="e.g. 5 Tips for Filmmakers">
+            </div>
+            <div>
+                <label>Duration (Seconds)</label>
+                <select id="miniDuration">
+                    <option>20 Seconds</option><option>25 Seconds</option><option>30 Seconds</option>
+                    <option>35 Seconds</option><option>40 Seconds</option><option>45 Seconds</option>
+                    <option>50 Seconds</option><option>55 Seconds</option><option>60 Seconds</option>
+                </select>
+            </div>
+            <div>
+                <label>Style</label>
+                <select id="miniStyle">
+                    <option>Trending Audio / Visual</option>
+                    <option>Talking Head (Educational)</option>
+                    <option>Cinematic Montage</option>
+                    <option>Comedy Skit</option>
+                </select>
+            </div>
+        </div>
+        <button class="action-btn" onclick="generateMini()">GENERATE REEL SCRIPT</button>
+        <div id="miniLoader" class="loader">Creating Viral Content...</div>
+        <div class="output-box">
+            <button class="copy-btn" onclick="copyText('miniOutput')">Copy</button>
+            <div id="miniOutput"></div>
+        </div>
+    </div>
+
+    <div id="youtube" class="tab-content">
+        <div class="input-grid">
+            <div class="full-width">
+                <label>Video Title</label>
+                <input type="text" id="ytTopic" placeholder="e.g. Short Film Budgeting Guide">
+            </div>
+            <div>
+                <label>Duration</label>
+                <select id="ytDuration">
+                    <option>10 Minutes</option><option>15 Minutes</option>
+                    <option>20 Minutes</option><option>25 Minutes</option>
+                    <option>30 Minutes</option>
+                </select>
+            </div>
+            <div>
+                <label>Category</label>
+                <select id="ytCategory">
+                    <option>Filmmaking / Tutorial</option>
+                    <option>Review / Analysis</option>
+                    <option>Vlog / Behind the Scenes</option>
+                    <option>Documentary</option>
+                    <option>Storytime</option>
+                </select>
+            </div>
+        </div>
+        <button class="action-btn" onclick="generateYouTube()">GENERATE YOUTUBE SCRIPT</button>
+        <div id="ytLoader" class="loader">Writing Script...</div>
+        <div class="output-box">
+            <button class="copy-btn" onclick="copyText('ytOutput')">Copy</button>
+            <div id="ytOutput"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- State & Utility ---
+    let lastGeneratedScript = ""; 
+
+    window.onload = () => {
+        const key = localStorage.getItem('nisff_key');
+        if (key) document.getElementById('apiKey').value = key;
+    };
+
+    function openTab(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(id).classList.add('active');
+        // Find button that calls this function to add active class
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            if(btn.getAttribute('onclick').includes(id)) {
+                btn.classList.add('active');
+                btn.classList.remove('has-data'); // Remove dot when viewed
+            }
+        });
+    }
+
+    function getKey() {
+        const key = document.getElementById('apiKey').value.trim();
+        if(key) localStorage.setItem('nisff_key', key);
+        return key;
+    }
+
+    function copyText(id) {
+        navigator.clipboard.writeText(document.getElementById(id).innerText);
+        alert("Copied!");
+    }
+
+    async function callGemini(prompt) {
+        const key = getKey();
+        if(!key) { alert("Please enter API Key"); return null; }
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        } catch (e) {
+            alert("Error: " + e.message);
+            return null;
+        }
+    }
+
+    // --- 1. Short Film Generator (Triggers 2 & 3) ---
+    async function generateFilm() {
+        const idea = document.getElementById('filmIdea').value;
+        const genre = document.getElementById('filmGenre').value;
+        const dur = document.getElementById('filmDuration').value;
+        
+        if(!idea) return alert("Enter an idea first!");
+
+        // UI Updates
+        document.getElementById('filmLoader').style.display = 'block';
+        document.getElementById('filmOutput').innerText = "";
+
+        const prompt = `Act as a Professional Screenwriter for NISFF.
+        Write a Short Film Script.
+        Title/Idea: ${idea}
+        Genre: ${genre}
+        Target Duration: ${dur}
+        
+        Format: Standard Screenplay Format (Scene Headings, Action, Character, Dialogue).
+        Ensure proper pacing for ${dur}. Include detailed visual descriptions.`;
+
+        const script = await callGemini(prompt);
+        
+        if (script) {
+            document.getElementById('filmLoader').style.display = 'none';
+            document.getElementById('filmOutput').innerText = script;
+            
+            // Store context for other tabs
+            lastGeneratedScript = script;
+            document.getElementById('diaContext').value = `Based on this script: ${idea} (${genre})`;
+            document.getElementById('posterContext').value = `Movie: ${idea} - ${genre}`;
+
+            // Trigger Background Generators
+            autoGenerateDialogue(script);
+            autoGeneratePoster(idea, genre);
+        }
+    }
+
+    // --- 2. Auto Dialogue Generator ---
+    async function autoGenerateDialogue(fullScript) {
+        // UI Indicator for background work
+        const btn = document.getElementById('btn-dialogue');
+        
+        const prompt = `Act as a Dialogue Doctor. Based on this script summary/content:
+        "${fullScript.substring(0, 2000)}..." (Context)
+        
+        Extract or Rewrite the 3 most impactful dialogue exchanges from this film. 
+        Focus on subtext, emotional depth, and realistic flow. 
+        Format as Character Name: Dialogue.`;
+
+        const res = await callGemini(prompt);
+        if (res) {
+            document.getElementById('diaOutput').innerText = res;
+            btn.classList.add('has-data'); // Add Blinking Dot
+        }
+    }
+
+    // Manual Dialogue Gen
+    async function generateDialogue() {
+        const context = document.getElementById('diaContext').value;
+        if(!context) return alert("Enter context!");
+        document.getElementById('diaLoader').style.display = 'block';
+        
+        const prompt = `Write intense movie dialogue based on: ${context}. Format as screenplay.`;
+        const res = await callGemini(prompt);
+        document.getElementById('diaLoader').style.display = 'none';
+        if(res) document.getElementById('diaOutput').innerText = res;
+    }
+
+    // --- 3. Auto Poster Generator ---
+    async function autoGeneratePoster(idea, genre) {
+        const btn = document.getElementById('btn-poster');
+        
+        const prompt = `Act as a Visual Artist. Create 3 Midjourney/DALL-E prompts for a Movie Poster.
+        Movie Concept: ${idea}
+        Genre: ${genre}
+        
+        Style: Cinematic, High Contrast, Festival Award Winning style.
+        Output: Just the prompts.`;
+
+        const res = await callGemini(prompt);
+        if (res) {
+            document.getElementById('posterOutput').innerText = res;
+            btn.classList.add('has-data'); // Add Blinking Dot
+        }
+    }
+
+    // Manual Poster Gen
+    async function generatePoster() {
+        const ctx = document.getElementById('posterContext').value;
+        if(!ctx) return alert("Enter summary!");
+        document.getElementById('posterLoader').style.display = 'block';
+        const res = await callGemini(`Create movie poster prompts for: ${ctx}`);
+        document.getElementById('posterLoader').style.display = 'none';
+        if(res) document.getElementById('posterOutput').innerText = res;
+    }
+
+    // --- 4. Mini Video (Separate Logic) ---
+    async function generateMini() {
+        const topic = document.getElementById('miniTopic').value;
+        const dur = document.getElementById('miniDuration').value;
+        const style = document.getElementById('miniStyle').value;
+
+        if(!topic) return alert("Enter topic!");
+        document.getElementById('miniLoader').style.display = 'block';
+
+        const prompt = `Act as a Viral Content Creator. Write a script for a ${dur} vertical video (Reels/Shorts).
+        Topic: ${topic}
+        Style: ${style}
+        Structure:
+        0-3s: Hook
+        Body: Content
+        End: CTA`;
+
+        const res = await callGemini(prompt);
+        document.getElementById('miniLoader').style.display = 'none';
+        if(res) document.getElementById('miniOutput').innerText = res;
+    }
+
+    // --- 5. YouTube Script (Separate Logic) ---
+    async function generateYouTube() {
+        const topic = document.getElementById('ytTopic').value;
+        const dur = document.getElementById('ytDuration').value;
+        const cat = document.getElementById('ytCategory').value;
+
+        if(!topic) return alert("Enter title!");
+        document.getElementById('ytLoader').style.display = 'block';
+
+        const prompt = `Act as a YouTuber. Write a script for a ${dur} video.
+        Title: ${topic}
+        Category: ${cat}
+        
+        Include: Intro, Hook, Main Content Points (Detailed), Sponsor Spot (Placeholder), Outro.`;
+
+        const res = await callGemini(prompt);
+        document.getElementById('ytLoader').style.display = 'none';
+        if(res) document.getElementById('ytOutput').innerText = res;
+    }
+
+</script>
+
+</body>
+</html>
