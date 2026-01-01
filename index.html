@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v6.0</title>
+    <title>NISFF Script Writer Pro v6.1</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -17,11 +17,10 @@
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; height: 100vh; overflow: hidden; }
         
-        /* --- UTILITIES --- */
         .hidden { display: none !important; }
         button { cursor: pointer; }
 
-        /* --- LOGIN & ADMIN STYLES --- */
+        /* --- LOGIN & ADMIN --- */
         #login-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 1000;
@@ -49,7 +48,6 @@
 
         .admin-toggle { margin-top: 20px; font-size: 12px; color: #666; text-decoration: underline; cursor: pointer; }
 
-        /* Admin Panel Overlay */
         #admin-panel {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #1a1a1a; padding: 30px; border: 1px solid var(--success);
@@ -60,7 +58,7 @@
         .user-list { max-height: 150px; overflow-y: auto; background: #111; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
         .user-item { font-size: 12px; padding: 5px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
 
-        /* --- APP MAIN STYLES --- */
+        /* --- APP MAIN --- */
         .app-shell { 
             max-width: 1200px; margin: 20px auto; background: var(--card); 
             border: 1px solid var(--border); border-radius: 12px; padding: 20px; 
@@ -109,7 +107,8 @@
 
         .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 10px; min-height: 250px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
         
-        .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; }
+        .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -129,12 +128,10 @@
 <div id="admin-panel">
     <h3>Admin: Manage Users</h3>
     <div class="user-list" id="userListDisplay"></div>
-    
     <label>New Username</label>
     <input type="text" id="newUser" style="margin-bottom:10px;">
     <label>New Password</label>
     <input type="text" id="newPass" style="margin-bottom:10px;">
-    
     <button class="action-btn" style="background:var(--success); color:#fff;" onclick="createUser()">Create User</button>
     <button class="action-btn" style="background:#333; color:#fff; margin-top:10px;" onclick="toggleAdminPanel()">Close</button>
 </div>
@@ -211,7 +208,7 @@
             </div>
         </div>
         <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + ASSETS</button>
-        <div id="filmLoader" class="loader">WRITING...</div>
+        <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         
         <div class="toolbar">
             <select id="hist-film" style="background:#222; color:#fff; border:none; padding:5px;" onchange="restoreHistory('film')">
@@ -283,13 +280,22 @@
             <div>
                 <label>Duration</label>
                 <select id="miniDuration">
-                    <option>20 Seconds</option><option>30 Seconds</option><option>45 Seconds</option><option>60 Seconds</option>
+                    <option>20 Seconds</option>
+                    <option>25 Seconds</option>
+                    <option>30 Seconds</option>
+                    <option>35 Seconds</option>
+                    <option>40 Seconds</option>
+                    <option>45 Seconds</option>
+                    <option>50 Seconds</option>
+                    <option>55 Seconds</option>
+                    <option>60 Seconds</option>
                 </select>
             </div>
             <div>
                 <label>Category</label>
                 <select id="miniCategory">
                     <option>Comedy</option><option>Horror</option><option>Drama</option><option>Educational</option><option>Vlog</option><option>Tech</option>
+                    <option>Animation</option><option>Action</option><option>Thriller</option><option>Dance</option>
                 </select>
             </div>
             <div>
@@ -318,11 +324,20 @@
             </div>
             <div>
                 <label>Duration</label>
-                <select id="ytDuration"><option>10 Min</option><option>20 Min</option><option>30 Min</option></select>
+                <select id="ytDuration">
+                    <option>10 Minutes</option>
+                    <option>15 Minutes</option>
+                    <option>20 Minutes</option>
+                    <option>25 Minutes</option>
+                    <option>30 Minutes</option>
+                </select>
             </div>
             <div>
                 <label>Category</label>
-                <select id="ytCategory"><option>Comedy</option><option>Tech</option><option>Vlog</option><option>Docu</option><option>Horror</option></select>
+                <select id="ytCategory">
+                    <option>Comedy</option><option>Tech</option><option>Vlog</option><option>Docu</option><option>Horror</option>
+                    <option>Gaming</option><option>Education</option><option>Review</option><option>Animation</option>
+                </select>
             </div>
             <div>
                 <label>Language</label>
@@ -345,19 +360,17 @@
 </div>
 
 <script>
-    // --- AUTHENTICATION SYSTEM ---
+    // --- AUTHENTICATION ---
     const MASTER_USER = "nexgnlabs";
     const MASTER_PASS = "IMlegend255@";
 
     window.onload = () => {
-        // Initialize Default Admin if local storage empty
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         if (users.length === 0) {
             users.push({ u: MASTER_USER, p: MASTER_PASS, role: 'admin' });
             localStorage.setItem('nisff_users', JSON.stringify(users));
         }
 
-        // Init App state
         const key = localStorage.getItem('nisff_key');
         if (key) document.getElementById('apiKey').value = key;
         
@@ -373,72 +386,53 @@
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
         const err = document.getElementById('loginError');
-        
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         const valid = users.find(user => user.u === u && user.p === p);
 
         if (valid) {
             document.getElementById('login-wrapper').classList.add('hidden');
             document.getElementById('app-main').classList.remove('hidden');
-            // Store current session role
-            sessionStorage.setItem('current_role', valid.role);
         } else {
             err.innerText = "Invalid Credentials";
         }
     }
 
-    function logout() {
-        location.reload();
-    }
+    function logout() { location.reload(); }
 
-    // --- ADMIN PANEL LOGIC ---
     function toggleAdminPanel() {
         const panel = document.getElementById('admin-panel');
-        
-        // If opening, require Master Auth check if not already verified
         if (panel.style.display === 'none' || panel.style.display === '') {
             const u = prompt("Enter Admin Username:");
             const p = prompt("Enter Admin Password:");
             if (u === MASTER_USER && p === MASTER_PASS) {
                 renderUserList();
                 panel.style.display = 'block';
-            } else {
-                alert("Access Denied");
-            }
-        } else {
-            panel.style.display = 'none';
-        }
+            } else { alert("Access Denied"); }
+        } else { panel.style.display = 'none'; }
     }
 
     function renderUserList() {
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         const list = document.getElementById('userListDisplay');
         list.innerHTML = '';
-        users.forEach((user, index) => {
-            list.innerHTML += `<div class="user-item"><span>${user.u}</span> <span>${user.role}</span></div>`;
-        });
+        users.forEach(user => list.innerHTML += `<div class="user-item"><span>${user.u}</span> <span>${user.role}</span></div>`);
     }
 
     function createUser() {
         const u = document.getElementById('newUser').value;
         const p = document.getElementById('newPass').value;
         if (!u || !p) return alert("Fill all fields");
-
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         users.push({ u: u, p: p, role: 'user' });
         localStorage.setItem('nisff_users', JSON.stringify(users));
-        
-        alert("User Created!");
-        renderUserList();
+        alert("User Created!"); renderUserList();
     }
 
     // --- APP LOGIC ---
-
     function openTab(id) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        
         document.querySelectorAll('.tab-btn').forEach(btn => {
             if(btn.onclick.toString().includes(id)) {
                 btn.classList.add('active');
@@ -453,17 +447,13 @@
         return key;
     }
 
-    function copyText(id) {
-        navigator.clipboard.writeText(document.getElementById(id).innerText);
-        alert("Copied!");
-    }
+    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); alert("Copied!"); }
 
     function clearTab(tabId, idsToClear) {
         if(confirm("Clear this tab?")) {
             idsToClear.forEach(id => {
                 const el = document.getElementById(id);
-                if(el.tagName === 'DIV') el.innerText = "";
-                else el.value = "";
+                if(el.tagName === 'DIV') el.innerText = ""; else el.value = "";
             });
         }
     }
@@ -471,27 +461,20 @@
     function printArea(id) {
         const content = document.getElementById(id).innerHTML;
         const win = window.open('', '', 'height=700,width=900');
-        win.document.write('<html><head><title>Print Script</title>');
-        win.document.write('<style>body{font-family:"Courier New"; padding:40px; white-space: pre-wrap;}</style>');
-        win.document.write('</head><body>');
-        win.document.write(content);
-        win.document.write('</body></html>');
-        win.document.close();
-        win.print();
+        win.document.write(`<html><head><title>Print</title><style>body{font-family:'Courier New'; padding:40px; white-space: pre-wrap;}</style></head><body>${content}</body></html>`);
+        win.document.close(); win.print();
     }
 
-    // --- HTML TAG REMOVER ---
     function sanitizeOutput(text) {
         if (!text) return "";
-        // Removes <center>, <b>, <i>, and other HTML-like tags
-        return text.replace(/<[^>]*>?/gm, '');
+        return text.replace(/<[^>]*>?/gm, ''); // Removes HTML tags
     }
 
-    // --- API CALLER ---
     async function callGemini(prompt) {
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
+        // Using Stable Model
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
 
         try {
@@ -510,14 +493,22 @@
             });
 
             const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            if (!data.candidates) throw new Error("No output generated.");
+            
+            // ERROR HANDLING LOGIC
+            if (data.error) {
+                alert("API Error: " + data.error.message);
+                return null;
+            }
+            if (!data.candidates || data.candidates.length === 0) {
+                alert("Generation Error: The AI returned no content. This might be due to safety filters or network issues.");
+                return null;
+            }
 
-            // SANITIZE HERE
             return sanitizeOutput(data.candidates[0].content.parts[0].text);
 
         } catch (e) {
             console.error(e);
+            alert("Network/Unknown Error: " + e.message);
             return null;
         }
     }
@@ -536,11 +527,10 @@
         let hist = JSON.parse(localStorage.getItem('nisff_hist') || '{}');
         const list = hist[category] || [];
         const select = document.getElementById(`hist-${category}`);
-        select.innerHTML = '<option value="">🕒 Restore History...</option>';
+        select.innerHTML = '<option value="">🕒 History</option>';
         list.forEach((item, index) => {
             const opt = document.createElement('option');
-            opt.value = index;
-            opt.text = item.time;
+            opt.value = index; opt.text = item.time;
             select.appendChild(opt);
         });
     }
@@ -561,21 +551,22 @@
         const lang = document.getElementById('filmLanguage').value;
         
         if(!idea) return alert("Enter Idea");
-        document.getElementById('filmLoader').style.display = 'block';
+        
+        const loader = document.getElementById('filmLoader');
+        loader.style.display = 'block';
         
         const prompt = `Act as a Professional Screenwriter. Write a Short Film Script.
-        Language: ${lang} (Write Dialogue and Action in Native Script).
+        Language: ${lang} (Write Dialogue/Action in Native Script).
         Title: ${idea}. Genre: ${genre}. Duration: ${dur}.
-        Format: Standard Screenplay. 
-        IMPORTANT: OUTPUT ONLY PLAIN TEXT. DO NOT USE HTML TAGS. USE UPPERCASE FOR NAMES.`;
+        Format: Standard Screenplay. NO HTML TAGS.`;
 
         const script = await callGemini(prompt);
-        document.getElementById('filmLoader').style.display = 'none';
+        loader.style.display = 'none';
         
         if(script) {
             document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
-            // Autofill others
+            // Autofill
             document.getElementById('diaContext').value = `Script: ${idea}`;
             document.getElementById('diaLanguage').value = lang;
             document.getElementById('cameraContext').value = `Script: ${idea}`;
@@ -588,7 +579,7 @@
 
     async function autoGenerateDialogue(fullScript, lang) {
         const btn = document.getElementById('btn-dialogue');
-        const res = await callGemini(`Extract 3 key dialogues from this script in ${lang}: ${fullScript.substring(0,1000)}. Output Plain Text Only.`);
+        const res = await callGemini(`Extract 3 key dialogues from this script in ${lang}: ${fullScript.substring(0,1000)}. Plain Text.`);
         if(res) {
             document.getElementById('diaOutput').innerText = res;
             addToHistory('dia', res);
@@ -600,14 +591,14 @@
         const context = document.getElementById('diaContext').value;
         const lang = document.getElementById('diaLanguage').value;
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write movie dialogue for: ${context}. Language: ${lang}. Plain Text Format.`);
+        const res = await callGemini(`Write movie dialogue for: ${context}. Language: ${lang}. Plain Text.`);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
     }
 
     async function autoGenerateCamera(title, genre, lang) {
         const btn = document.getElementById('btn-camera');
-        const res = await callGemini(`List 5 Camera/Drone shots for film "${title}" (${genre}). Language: ${lang}. Plain Text Only.`);
+        const res = await callGemini(`List 5 Camera/Drone shots for film "${title}" (${genre}). Language: ${lang}. Plain Text.`);
         if(res) {
             document.getElementById('cameraOutput').innerText = res;
             addToHistory('camera', res);
