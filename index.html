@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v5.1</title>
+    <title>NISFF Script Writer Pro v6.0</title>
     <style>
         :root {
-            --primary: #d4af37; /* Festival Gold */
+            --primary: #d4af37; /* Gold */
             --bg: #050505;
             --card: #141414;
             --text: #e0e0e0;
@@ -15,21 +15,70 @@
             --error: #ff5252;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .app-shell { max-width: 1200px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); min-height: 90vh; display: flex; flex-direction: column; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; height: 100vh; overflow: hidden; }
+        
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        button { cursor: pointer; }
 
-        /* Header */
-        .header { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
-        h1 { margin: 0; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
-        .api-input { background: #000; border: 1px solid var(--primary); color: #fff; padding: 8px 15px; border-radius: 20px; width: 300px; text-align: center; margin-top: 10px; font-family: monospace; }
+        /* --- LOGIN & ADMIN STYLES --- */
+        #login-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            background-image: radial-gradient(circle at center, #222 0%, #000 70%);
+        }
 
-        /* Navigation Tabs */
+        .login-box {
+            background: var(--card); padding: 40px; border-radius: 12px;
+            border: 1px solid var(--primary); text-align: center; width: 350px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+
+        .login-box h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 2px; }
+        .login-input {
+            width: 100%; padding: 12px; margin-bottom: 15px; background: #222;
+            border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;
+        }
+        .login-btn {
+            width: 100%; padding: 12px; background: var(--primary); color: #000;
+            font-weight: bold; border: none; border-radius: 6px; font-size: 16px;
+            transition: 0.3s;
+        }
+        .login-btn:hover { background: #fff; }
+
+        .admin-toggle { margin-top: 20px; font-size: 12px; color: #666; text-decoration: underline; cursor: pointer; }
+
+        /* Admin Panel Overlay */
+        #admin-panel {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1a1a1a; padding: 30px; border: 1px solid var(--success);
+            border-radius: 10px; width: 400px; z-index: 1100; display: none;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        #admin-panel h3 { color: var(--success); margin-top: 0; }
+        .user-list { max-height: 150px; overflow-y: auto; background: #111; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
+        .user-item { font-size: 12px; padding: 5px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+
+        /* --- APP MAIN STYLES --- */
+        .app-shell { 
+            max-width: 1200px; margin: 20px auto; background: var(--card); 
+            border: 1px solid var(--border); border-radius: 12px; padding: 20px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); height: 90vh; 
+            display: flex; flex-direction: column; 
+        }
+
+        .header { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; position: relative; }
+        h1 { margin: 0; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .api-input { background: #000; border: 1px solid var(--primary); color: #fff; padding: 8px 15px; border-radius: 20px; width: 300px; text-align: center; font-family: monospace; }
+        
+        .logout-btn { position: absolute; right: 0; top: 0; background: #333; color: #fff; border: none; padding: 5px 10px; font-size: 12px; border-radius: 4px; }
+
         .nav-tabs { display: flex; gap: 5px; background: #000; padding: 5px; border-radius: 8px; flex-wrap: wrap; }
         .tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #888; cursor: pointer; font-weight: bold; position: relative; transition: 0.3s; border-radius: 6px; min-width: 120px; }
         .tab-btn:hover { background: #222; color: #fff; }
         .tab-btn.active { background: var(--primary); color: #000; }
 
-        /* Blinking Dot Notification */
         .has-data::after {
             content: ''; position: absolute; top: 8px; left: 8px;
             width: 8px; height: 8px; background-color: var(--success);
@@ -38,134 +87,139 @@
         }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* Content Sections */
-        .tab-content { display: none; padding-top: 25px; flex-grow: 1; }
+        .tab-content { display: none; padding-top: 20px; flex-grow: 1; overflow-y: auto; }
         .tab-content.active { display: block; }
 
-        /* Inputs & Grid */
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .full-width { grid-column: span 3; }
         
-        label { display: block; font-size: 12px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
 
-        /* Buttons */
-        .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.2s; }
-        .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        
-        /* Toolbar */
+        .action-btn { width: 100%; padding: 12px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 15px; margin-top: 5px; transition: 0.2s; }
+        .action-btn:hover { filter: brightness(1.1); }
+
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 5px 0; border-bottom: 1px solid #222; }
-        .tool-group { display: flex; gap: 10px; }
-        .sm-btn { background: #333; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; }
-        .sm-btn:hover { background: #555; border-color: #777; }
-        .print-btn { background: #2c3e50; border-color: #34495e; }
-        .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 200px; }
+        .tool-group { display: flex; gap: 8px; }
+        .sm-btn { background: #333; color: #fff; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; font-size: 11px; }
+        .sm-btn:hover { background: #555; }
+        .clear-btn { background: #c62828; border-color: #b71c1c; }
+        .clear-btn:hover { background: #b71c1c; }
 
-        /* Output Boxes */
-        .output-box { background: #000; border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-top: 10px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
+        .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 10px; min-height: 250px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
         
-        /* Loader & Error */
-        .loader { display: none; text-align: center; color: var(--primary); margin-top: 20px; font-weight: bold; }
-        .error-msg { display: none; background: rgba(255, 82, 82, 0.1); border: 1px solid var(--error); color: var(--error); padding: 15px; border-radius: 6px; margin-top: 15px; text-align: center; }
-
+        .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
+<div id="login-wrapper">
+    <div class="login-box">
+        <h2>NISFF PRO</h2>
+        <input type="text" id="loginUser" class="login-input" placeholder="Username">
+        <input type="password" id="loginPass" class="login-input" placeholder="Password">
+        <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+        <div id="loginError" style="color:var(--error); margin-top:10px; font-size:12px;"></div>
+        
+        <div class="admin-toggle" onclick="toggleAdminPanel()">Admin Panel (Restricted)</div>
+    </div>
+</div>
+
+<div id="admin-panel">
+    <h3>Admin: Manage Users</h3>
+    <div class="user-list" id="userListDisplay"></div>
+    
+    <label>New Username</label>
+    <input type="text" id="newUser" style="margin-bottom:10px;">
+    <label>New Password</label>
+    <input type="text" id="newPass" style="margin-bottom:10px;">
+    
+    <button class="action-btn" style="background:var(--success); color:#fff;" onclick="createUser()">Create User</button>
+    <button class="action-btn" style="background:#333; color:#fff; margin-top:10px;" onclick="toggleAdminPanel()">Close</button>
+</div>
+
+<div class="app-shell hidden" id="app-main">
     <div class="header">
-        <h1>NISFF Script Writer Pro v5.1</h1>
+        <h1>NISFF Script Writer Pro</h1>
+        <button class="logout-btn" onclick="logout()">LOGOUT</button>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
     </div>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Script</button>
-        <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
-        <button class="tab-btn" id="btn-camera" onclick="openTab('camera')">🎥 Camera & Drone</button>
-        <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels Video</button>
-        <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Script</button>
+        <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film</button>
+        <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue</button>
+        <button class="tab-btn" id="btn-camera" onclick="openTab('camera')">🎥 Camera/Drone</button>
+        <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels</button>
+        <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube</button>
     </div>
 
     <datalist id="languageOptions">
         <option value="English">English</option>
         <option value="Hindi">Hindi (हिन्दी)</option>
         <option value="Marathi">Marathi (मराठी)</option>
-        <option value="Assamese">Assamese (অসমীয়া)</option>
-        <option value="Bengali">Bengali (বাংলা)</option>
-        <option value="Tamil">Tamil (தமிழ்)</option>
-        <option value="Telugu">Telugu (తెలుగు)</option>
-        <option value="Urdu">Urdu (اردو)</option>
-        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-        <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
-        <option value="Malayalam">Malayalam (മലയാളം)</option>
-        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-        <option value="Maithili">Maithili (मैथिली)</option>
-        <option value="Santali">Santali (संथाली)</option>
-        <option value="Kashmiri">Kashmiri (कश्मीरी)</option>
-        <option value="Nepali">Nepali (नेपाली)</option>
-        <option value="Konkani">Konkani (कोंकणी)</option>
-        <option value="Sindhi">Sindhi (सिंधी)</option>
-        <option value="Dogri">Dogri (डोगरी)</option>
-        <option value="Manipuri">Manipuri (মণিপুরী)</option>
-        <option value="Bodo">Bodo (बर')</option>
+        <option value="Bengali">Bengali</option>
+        <option value="Tamil">Tamil</option>
+        <option value="Telugu">Telugu</option>
+        <option value="Urdu">Urdu</option>
+        <option value="Gujarati">Gujarati</option>
+        <option value="Kannada">Kannada</option>
+        <option value="Odia">Odia</option>
+        <option value="Malayalam">Malayalam</option>
+        <option value="Punjabi">Punjabi</option>
+        <option value="Assamese">Assamese</option>
+        <option value="Maithili">Maithili</option>
+        <option value="Santali">Santali</option>
+        <option value="Kashmiri">Kashmiri</option>
+        <option value="Nepali">Nepali</option>
+        <option value="Konkani">Konkani</option>
+        <option value="Sindhi">Sindhi</option>
+        <option value="Dogri">Dogri</option>
+        <option value="Manipuri">Manipuri</option>
+        <option value="Bodo">Bodo</option>
         <option value="Spanish">Spanish</option>
         <option value="French">French</option>
-        <option value="German">German</option>
+        <option value="Chinese">Chinese</option>
     </datalist>
 
     <div id="film" class="tab-content active">
         <div class="input-grid">
             <div class="full-width">
-                <label>Movie Idea / Logline</label>
-                <textarea id="filmIdea" rows="3" placeholder="e.g. A robot learns to paint..."></textarea>
+                <label>Movie Idea</label>
+                <textarea id="filmIdea" rows="2" placeholder="e.g. A robot learns to paint..."></textarea>
             </div>
             <div>
                 <label>Genre</label>
                 <select id="filmGenre">
-                    <option>Drama</option>
-                    <option>Animation</option>
-                    <option>Sci-Fi</option>
-                    <option>Horror</option>
-                    <option>Comedy</option>
-                    <option>Thriller</option>
-                    <option>Action</option>
-                    <option>Romance</option>
-                    <option>Mystery</option>
-                    <option>Fantasy</option>
-                    <option>Experimental</option>
-                    <option>Documentary</option>
-                    <option>Musical</option>
+                    <option>Drama</option><option>Animation</option><option>Sci-Fi</option>
+                    <option>Horror</option><option>Comedy</option><option>Thriller</option>
+                    <option>Action</option><option>Romance</option><option>Mystery</option>
+                    <option>Fantasy</option><option>Experimental</option><option>Documentary</option>
                 </select>
             </div>
             <div>
                 <label>Duration</label>
                 <select id="filmDuration">
-                    <option value="10 minutes">10 Minutes</option>
-                    <option value="15 minutes">15 Minutes</option>
-                    <option value="20 minutes">20 Minutes</option>
-                    <option value="25 minutes">25 Minutes</option>
-                    <option value="30 minutes">30 Minutes</option>
-                    <option value="35 minutes">35 Minutes</option>
-                    <option value="40 minutes">40 Minutes</option>
+                    <option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option>
+                    <option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option>
+                    <option>40 Minutes</option>
                 </select>
             </div>
             <div>
-                <label>Script Language (Strict)</label>
-                <input list="languageOptions" id="filmLanguage" placeholder="Select Language">
+                <label>Language</label>
+                <input list="languageOptions" id="filmLanguage" placeholder="Select">
             </div>
         </div>
-        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + SHOT LIST</button>
-        <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
-        <div id="filmError" class="error-msg"></div>
+        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + ASSETS</button>
+        <div id="filmLoader" class="loader">WRITING...</div>
         
         <div class="toolbar">
-            <select id="hist-film" class="history-select" onchange="restoreHistory('film')">
-                <option value="">🕒 Restore History...</option>
+            <select id="hist-film" style="background:#222; color:#fff; border:none; padding:5px;" onchange="restoreHistory('film')">
+                <option value="">🕒 History</option>
             </select>
             <div class="tool-group">
-                <button class="sm-btn print-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
+                <button class="sm-btn clear-btn" onclick="clearTab('film', ['filmIdea', 'filmLanguage', 'filmOutput'])">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
                 <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
             </div>
         </div>
@@ -175,94 +229,82 @@
     <div id="dialogue" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Context (Or auto-filled)</label>
-                <textarea id="diaContext" rows="3" placeholder="Paste context here..."></textarea>
+                <label>Context</label>
+                <textarea id="diaContext" rows="3" placeholder="Context..."></textarea>
             </div>
             <div class="full-width">
-                <label>Dialogue Language (Strict)</label>
-                <input list="languageOptions" id="diaLanguage" placeholder="Select Language for Dialogue">
+                <label>Language</label>
+                <input list="languageOptions" id="diaLanguage" placeholder="Select">
             </div>
         </div>
-        <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE ONLY</button>
-        <div id="diaLoader" class="loader">CRAFTING DIALOGUES...</div>
-        
+        <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE</button>
+        <div id="diaLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')">
-                <option value="">🕒 Restore History...</option>
-            </select>
+            <select id="hist-dia" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('dia')"><option>🕒 History</option></select>
             <div class="tool-group">
-                <button class="sm-btn print-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
+                <button class="sm-btn clear-btn" onclick="clearTab('dia', ['diaContext', 'diaOutput'])">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('diaOutput')">🖨️</button>
+                <button class="sm-btn" onclick="copyText('diaOutput')">📋</button>
             </div>
         </div>
-        <div id="diaOutput" class="output-box">No dialogue generated yet.</div>
+        <div id="diaOutput" class="output-box"></div>
     </div>
 
     <div id="camera" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Script Summary / Scene Context</label>
-                <textarea id="cameraContext" rows="3" placeholder="Paste scene details here..."></textarea>
+                <label>Scene Context</label>
+                <textarea id="cameraContext" rows="3" placeholder="Scene details..."></textarea>
             </div>
             <div class="full-width">
-                <label>Output Language</label>
-                <input list="languageOptions" id="cameraLanguage" placeholder="Same as Script (or Select)">
+                <label>Language</label>
+                <input list="languageOptions" id="cameraLanguage" placeholder="Select">
             </div>
         </div>
-        <button class="action-btn" onclick="generateCamera()">GENERATE SHOT LIST & DRONE ANGLES</button>
-        <div id="cameraLoader" class="loader">PLANNING CINEMATOGRAPHY...</div>
-        
+        <button class="action-btn" onclick="generateCamera()">GENERATE SHOT LIST</button>
+        <div id="cameraLoader" class="loader">PLANNING...</div>
         <div class="toolbar">
-            <select id="hist-camera" class="history-select" onchange="restoreHistory('camera')">
-                <option value="">🕒 Restore History...</option>
-            </select>
+            <select id="hist-camera" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('camera')"><option>🕒 History</option></select>
             <div class="tool-group">
-                <button class="sm-btn print-btn" onclick="printArea('cameraOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('cameraOutput')">📋 Copy</button>
+                <button class="sm-btn clear-btn" onclick="clearTab('camera', ['cameraContext', 'cameraOutput'])">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('cameraOutput')">🖨️</button>
+                <button class="sm-btn" onclick="copyText('cameraOutput')">📋</button>
             </div>
         </div>
-        <div id="cameraOutput" class="output-box">No shot list generated yet.</div>
+        <div id="cameraOutput" class="output-box"></div>
     </div>
 
     <div id="mini" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Topic / Viral Idea</label>
-                <input type="text" id="miniTopic" placeholder="e.g. 5 Tips for Filmmakers">
+                <label>Topic</label>
+                <input type="text" id="miniTopic">
             </div>
             <div>
                 <label>Duration</label>
                 <select id="miniDuration">
-                    <option>20 Seconds</option><option>25 Seconds</option><option>30 Seconds</option>
-                    <option>35 Seconds</option><option>40 Seconds</option><option>45 Seconds</option>
-                    <option>50 Seconds</option><option>55 Seconds</option><option>60 Seconds</option>
+                    <option>20 Seconds</option><option>30 Seconds</option><option>45 Seconds</option><option>60 Seconds</option>
                 </select>
             </div>
             <div>
                 <label>Category</label>
                 <select id="miniCategory">
-                    <option>Comedy</option><option>Horror</option><option>Drama</option>
-                    <option>Educational / Tips</option><option>Dance / Music</option>
-                    <option>Vlog / Lifestyle</option><option>Motivation</option><option>Tech / Review</option>
-                    <option>Food / Cooking</option><option>Thriller / Suspense</option>
-                    <option>Animation</option><option>Action / Transition</option>
+                    <option>Comedy</option><option>Horror</option><option>Drama</option><option>Educational</option><option>Vlog</option><option>Tech</option>
                 </select>
             </div>
             <div>
-                <label>Language (Strict)</label>
-                <input list="languageOptions" id="miniLanguage" placeholder="Select Language">
+                <label>Language</label>
+                <input list="languageOptions" id="miniLanguage">
             </div>
         </div>
-        <button class="action-btn" onclick="generateMini()">GENERATE REEL SCRIPT</button>
-        <div id="miniLoader" class="loader">Creating...</div>
-        
+        <button class="action-btn" onclick="generateMini()">GENERATE REELS</button>
+        <div id="miniLoader" class="loader">CREATING...</div>
         <div class="toolbar">
-            <select id="hist-mini" class="history-select" onchange="restoreHistory('mini')">
-                <option value="">🕒 Restore History...</option>
-            </select>
+            <select id="hist-mini" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('mini')"><option>🕒 History</option></select>
             <div class="tool-group">
-                <button class="sm-btn print-btn" onclick="printArea('miniOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('miniOutput')">📋 Copy</button>
+                <button class="sm-btn clear-btn" onclick="clearTab('mini', ['miniTopic', 'miniOutput'])">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('miniOutput')">🖨️</button>
+                <button class="sm-btn" onclick="copyText('miniOutput')">📋</button>
             </div>
         </div>
         <div id="miniOutput" class="output-box"></div>
@@ -271,42 +313,30 @@
     <div id="youtube" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Video Title</label>
-                <input type="text" id="ytTopic" placeholder="e.g. History of Horror Movies">
+                <label>Title</label>
+                <input type="text" id="ytTopic">
             </div>
             <div>
                 <label>Duration</label>
-                <select id="ytDuration">
-                    <option>10 Minutes</option><option>15 Minutes</option>
-                    <option>20 Minutes</option><option>25 Minutes</option>
-                    <option>30 Minutes</option>
-                </select>
+                <select id="ytDuration"><option>10 Min</option><option>20 Min</option><option>30 Min</option></select>
             </div>
             <div>
                 <label>Category</label>
-                <select id="ytCategory">
-                    <option>Comedy</option><option>Horror</option><option>Drama</option>
-                    <option>Sci-Fi / Futurist</option><option>Documentary</option>
-                    <option>Filmmaking Tutorial</option><option>Tech Review</option>
-                    <option>Gaming</option><option>Storytime</option><option>Vlog</option>
-                    <option>Education</option><option>Animation</option><option>Action</option>
-                </select>
+                <select id="ytCategory"><option>Comedy</option><option>Tech</option><option>Vlog</option><option>Docu</option><option>Horror</option></select>
             </div>
             <div>
-                <label>Language (Strict)</label>
-                <input list="languageOptions" id="ytLanguage" placeholder="Select Language">
+                <label>Language</label>
+                <input list="languageOptions" id="ytLanguage">
             </div>
         </div>
-        <button class="action-btn" onclick="generateYouTube()">GENERATE YOUTUBE SCRIPT</button>
-        <div id="ytLoader" class="loader">Writing Script...</div>
-        
+        <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
+        <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')">
-                <option value="">🕒 Restore History...</option>
-            </select>
+            <select id="hist-yt" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('yt')"><option>🕒 History</option></select>
             <div class="tool-group">
-                <button class="sm-btn print-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('ytOutput')">📋 Copy</button>
+                <button class="sm-btn clear-btn" onclick="clearTab('yt', ['ytTopic', 'ytOutput'])">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('ytOutput')">🖨️</button>
+                <button class="sm-btn" onclick="copyText('ytOutput')">📋</button>
             </div>
         </div>
         <div id="ytOutput" class="output-box"></div>
@@ -315,28 +345,94 @@
 </div>
 
 <script>
-    // --- Configuration ---
-    let lastGeneratedScript = ""; 
-    let globalLang = "English";
+    // --- AUTHENTICATION SYSTEM ---
+    const MASTER_USER = "nexgnlabs";
+    const MASTER_PASS = "IMlegend255@";
 
     window.onload = () => {
+        // Initialize Default Admin if local storage empty
+        const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        if (users.length === 0) {
+            users.push({ u: MASTER_USER, p: MASTER_PASS, role: 'admin' });
+            localStorage.setItem('nisff_users', JSON.stringify(users));
+        }
+
+        // Init App state
         const key = localStorage.getItem('nisff_key');
         if (key) document.getElementById('apiKey').value = key;
         
-        // Defaults
+        // Setup defaults
         document.getElementById('filmLanguage').value = "English";
         document.getElementById('diaLanguage').value = "English";
         document.getElementById('cameraLanguage').value = "English";
         document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
-
-        // Load History for all tabs
-        updateHistoryUI('film');
-        updateHistoryUI('dia');
-        updateHistoryUI('camera');
-        updateHistoryUI('mini');
-        updateHistoryUI('yt');
     };
+
+    function handleLogin() {
+        const u = document.getElementById('loginUser').value;
+        const p = document.getElementById('loginPass').value;
+        const err = document.getElementById('loginError');
+        
+        const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        const valid = users.find(user => user.u === u && user.p === p);
+
+        if (valid) {
+            document.getElementById('login-wrapper').classList.add('hidden');
+            document.getElementById('app-main').classList.remove('hidden');
+            // Store current session role
+            sessionStorage.setItem('current_role', valid.role);
+        } else {
+            err.innerText = "Invalid Credentials";
+        }
+    }
+
+    function logout() {
+        location.reload();
+    }
+
+    // --- ADMIN PANEL LOGIC ---
+    function toggleAdminPanel() {
+        const panel = document.getElementById('admin-panel');
+        
+        // If opening, require Master Auth check if not already verified
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            const u = prompt("Enter Admin Username:");
+            const p = prompt("Enter Admin Password:");
+            if (u === MASTER_USER && p === MASTER_PASS) {
+                renderUserList();
+                panel.style.display = 'block';
+            } else {
+                alert("Access Denied");
+            }
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    function renderUserList() {
+        const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        const list = document.getElementById('userListDisplay');
+        list.innerHTML = '';
+        users.forEach((user, index) => {
+            list.innerHTML += `<div class="user-item"><span>${user.u}</span> <span>${user.role}</span></div>`;
+        });
+    }
+
+    function createUser() {
+        const u = document.getElementById('newUser').value;
+        const p = document.getElementById('newPass').value;
+        if (!u || !p) return alert("Fill all fields");
+
+        const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        users.push({ u: u, p: p, role: 'user' });
+        localStorage.setItem('nisff_users', JSON.stringify(users));
+        
+        alert("User Created!");
+        renderUserList();
+    }
+
+    // --- APP LOGIC ---
 
     function openTab(id) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -362,63 +458,33 @@
         alert("Copied!");
     }
 
+    function clearTab(tabId, idsToClear) {
+        if(confirm("Clear this tab?")) {
+            idsToClear.forEach(id => {
+                const el = document.getElementById(id);
+                if(el.tagName === 'DIV') el.innerText = "";
+                else el.value = "";
+            });
+        }
+    }
+
     function printArea(id) {
         const content = document.getElementById(id).innerHTML;
         const win = window.open('', '', 'height=700,width=900');
         win.document.write('<html><head><title>Print Script</title>');
-        win.document.write('<style>');
-        win.document.write('body{font-family:"Courier New", monospace; padding:40px; line-height:1.6; color:#000;}');
-        win.document.write('white-space: pre-wrap;');
-        win.document.write('</style></head><body>');
+        win.document.write('<style>body{font-family:"Courier New"; padding:40px; white-space: pre-wrap;}</style>');
+        win.document.write('</head><body>');
         win.document.write(content);
         win.document.write('</body></html>');
         win.document.close();
         win.print();
     }
 
-    // --- HISTORY MANAGER ---
-    function addToHistory(category, text) {
-        let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
-        if(!hist[category]) hist[category] = [];
-        
-        const timestamp = new Date().toLocaleTimeString();
-        const snippet = text.substring(0, 30).replace(/\n/g, "") + "...";
-        
-        hist[category].unshift({ time: timestamp, preview: snippet, full: text });
-        
-        if(hist[category].length > 5) hist[category].pop();
-        
-        localStorage.setItem('nisff_history', JSON.stringify(hist));
-        updateHistoryUI(category);
-    }
-
-    function updateHistoryUI(category) {
-        let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
-        const list = hist[category] || [];
-        const select = document.getElementById(`hist-${category}`);
-        select.innerHTML = '<option value="">🕒 Restore History...</option>';
-        list.forEach((item, index) => {
-            const opt = document.createElement('option');
-            opt.value = index;
-            opt.text = `${item.time} - ${item.preview}`;
-            select.appendChild(opt);
-        });
-    }
-
-    function restoreHistory(category) {
-        const select = document.getElementById(`hist-${category}`);
-        const index = select.value;
-        if(index === "") return;
-
-        let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
-        const item = hist[category][index];
-        
-        const outputIds = {
-            'film': 'filmOutput', 'dia': 'diaOutput',
-            'camera': 'cameraOutput', 'mini': 'miniOutput', 'yt': 'ytOutput'
-        };
-        
-        document.getElementById(outputIds[category]).innerText = item.full;
+    // --- HTML TAG REMOVER ---
+    function sanitizeOutput(text) {
+        if (!text) return "";
+        // Removes <center>, <b>, <i>, and other HTML-like tags
+        return text.replace(/<[^>]*>?/gm, '');
     }
 
     // --- API CALLER ---
@@ -426,7 +492,7 @@
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
 
         try {
             const response = await fetch(url, {
@@ -444,90 +510,86 @@
             });
 
             const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+            if (!data.candidates) throw new Error("No output generated.");
 
-            if (data.error) throw new Error("API Error: " + data.error.message);
-            if (!data.candidates || data.candidates.length === 0) throw new Error("No content generated.");
-
-            return data.candidates[0].content.parts[0].text;
+            // SANITIZE HERE
+            return sanitizeOutput(data.candidates[0].content.parts[0].text);
 
         } catch (e) {
             console.error(e);
-            if(!prompt.includes("Dialogues") && !prompt.includes("Cinematographer")) {
-                alert(e.message);
-            }
             return null;
         }
     }
 
-    // --- 1. Short Film Generator ---
+    // --- HISTORY ---
+    function addToHistory(category, text) {
+        let hist = JSON.parse(localStorage.getItem('nisff_hist') || '{}');
+        if(!hist[category]) hist[category] = [];
+        hist[category].unshift({ time: new Date().toLocaleTimeString(), full: text });
+        if(hist[category].length > 5) hist[category].pop();
+        localStorage.setItem('nisff_hist', JSON.stringify(hist));
+        updateHistoryUI(category);
+    }
+
+    function updateHistoryUI(category) {
+        let hist = JSON.parse(localStorage.getItem('nisff_hist') || '{}');
+        const list = hist[category] || [];
+        const select = document.getElementById(`hist-${category}`);
+        select.innerHTML = '<option value="">🕒 Restore History...</option>';
+        list.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.text = item.time;
+            select.appendChild(opt);
+        });
+    }
+
+    function restoreHistory(category) {
+        const select = document.getElementById(`hist-${category}`);
+        if(select.value === "") return;
+        let hist = JSON.parse(localStorage.getItem('nisff_hist'));
+        const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'camera': 'cameraOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
+        document.getElementById(idMap[category]).innerText = hist[category][select.value].full;
+    }
+
+    // --- GENERATORS ---
     async function generateFilm() {
         const idea = document.getElementById('filmIdea').value;
         const genre = document.getElementById('filmGenre').value;
         const dur = document.getElementById('filmDuration').value;
         const lang = document.getElementById('filmLanguage').value;
-        globalLang = lang;
         
-        if(!idea) return alert("Enter an idea first!");
-
-        const loader = document.getElementById('filmLoader');
-        const errorDiv = document.getElementById('filmError');
-        const output = document.getElementById('filmOutput');
-
-        loader.style.display = 'block';
-        errorDiv.style.display = 'none';
-        output.innerText = "";
-
-        // STRICT FORMATTING PROMPT
-        const prompt = `Act as a Professional Screenwriter for NISFF.
-        Task: Write a Short Film Script.
+        if(!idea) return alert("Enter Idea");
+        document.getElementById('filmLoader').style.display = 'block';
         
-        STRICT LANGUAGE INSTRUCTION:
-        - The **Dialogue** and **Action Lines** MUST be written in **${lang}** (using native ${lang} script/characters).
-        - Scene Headings (e.g., INT. HOUSE - DAY) can be in English or ${lang}.
-        
-        STRICT FORMATTING:
-        - Do NOT use HTML tags like <center>.
-        - Use UPPERCASE for Character Names.
-        - Use Standard Screenplay Indentation logic (text-based).
-        
-        Details:
-        Title/Concept: ${idea}
-        Genre: ${genre}
-        Target Duration: ${dur}`;
+        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script.
+        Language: ${lang} (Write Dialogue and Action in Native Script).
+        Title: ${idea}. Genre: ${genre}. Duration: ${dur}.
+        Format: Standard Screenplay. 
+        IMPORTANT: OUTPUT ONLY PLAIN TEXT. DO NOT USE HTML TAGS. USE UPPERCASE FOR NAMES.`;
 
         const script = await callGemini(prompt);
+        document.getElementById('filmLoader').style.display = 'none';
         
-        loader.style.display = 'none';
-
-        if (script) {
-            output.innerText = script;
+        if(script) {
+            document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
-            lastGeneratedScript = script;
-            
-            // Auto fill contexts
-            document.getElementById('diaContext').value = `Based on script: ${idea} (${genre})`;
-            document.getElementById('diaLanguage').value = lang; 
-            document.getElementById('cameraContext').value = `Cinematography for: ${idea} (${genre})`;
+            // Autofill others
+            document.getElementById('diaContext').value = `Script: ${idea}`;
+            document.getElementById('diaLanguage').value = lang;
+            document.getElementById('cameraContext').value = `Script: ${idea}`;
             document.getElementById('cameraLanguage').value = lang;
-
-            // Trigger background tasks
+            
             autoGenerateDialogue(script, lang);
             autoGenerateCamera(idea, genre, lang);
-        } else {
-            errorDiv.innerText = "Failed to generate script. Check API Key.";
-            errorDiv.style.display = 'block';
         }
     }
 
-    // --- 2. Dialogue Generator ---
     async function autoGenerateDialogue(fullScript, lang) {
         const btn = document.getElementById('btn-dialogue');
-        const prompt = `Based on this script: "${fullScript.substring(0, 1000)}...". 
-        Task: Extract/Rewrite 3 key dialogue exchanges.
-        STRICT INSTRUCTION: Output dialogue ONLY in **${lang}** (Native Script). No English translation unless requested.`;
-        
-        const res = await callGemini(prompt);
-        if (res) {
+        const res = await callGemini(`Extract 3 key dialogues from this script in ${lang}: ${fullScript.substring(0,1000)}. Output Plain Text Only.`);
+        if(res) {
             document.getElementById('diaOutput').innerText = res;
             addToHistory('dia', res);
             btn.classList.add('has-data');
@@ -537,27 +599,16 @@
     async function generateDialogue() {
         const context = document.getElementById('diaContext').value;
         const lang = document.getElementById('diaLanguage').value;
-        if(!context) return alert("Enter context!");
-        
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write intense movie dialogue based on: ${context}. STRICT INSTRUCTION: Write ONLY in **${lang}** (Native Script).`);
+        const res = await callGemini(`Write movie dialogue for: ${context}. Language: ${lang}. Plain Text Format.`);
         document.getElementById('diaLoader').style.display = 'none';
-        if(res) {
-            document.getElementById('diaOutput').innerText = res;
-            addToHistory('dia', res);
-        }
+        if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
     }
 
-    // --- 3. Camera & Drone Angles ---
     async function autoGenerateCamera(title, genre, lang) {
         const btn = document.getElementById('btn-camera');
-        
-        const prompt = `Act as a Director of Photography (DoP).
-        Task: List 5-7 creative Camera Angles and Drone Shots for "${title}".
-        STRICT INSTRUCTION: Write the descriptions in **${lang}** (Native Script).`;
-
-        const res = await callGemini(prompt);
-        if (res) {
+        const res = await callGemini(`List 5 Camera/Drone shots for film "${title}" (${genre}). Language: ${lang}. Plain Text Only.`);
+        if(res) {
             document.getElementById('cameraOutput').innerText = res;
             addToHistory('camera', res);
             btn.classList.add('has-data');
@@ -567,65 +618,30 @@
     async function generateCamera() {
         const ctx = document.getElementById('cameraContext').value;
         const lang = document.getElementById('cameraLanguage').value;
-        if(!ctx) return alert("Enter scene details!");
         document.getElementById('cameraLoader').style.display = 'block';
-        
-        const prompt = `Act as a Cinematographer. Suggest creative Camera Angles, Lens Choices, and Drone Shots for: "${ctx}". 
-        STRICT INSTRUCTION: Write the descriptions in **${lang}** (Native Script).`;
-
-        const res = await callGemini(prompt);
+        const res = await callGemini(`Suggest Camera/Drone shots for: ${ctx}. Language: ${lang}. Plain Text.`);
         document.getElementById('cameraLoader').style.display = 'none';
-        if(res) {
-            document.getElementById('cameraOutput').innerText = res;
-            addToHistory('camera', res);
-        }
+        if(res) { document.getElementById('cameraOutput').innerText = res; addToHistory('camera', res); }
     }
 
-    // --- 4. Mini Video ---
     async function generateMini() {
         const topic = document.getElementById('miniTopic').value;
-        const dur = document.getElementById('miniDuration').value;
-        const cat = document.getElementById('miniCategory').value;
         const lang = document.getElementById('miniLanguage').value;
-
-        if(!topic) return alert("Enter topic!");
         document.getElementById('miniLoader').style.display = 'block';
-
-        const prompt = `Write a ${dur} vertical video script (Reels/Shorts).
-        STRICT INSTRUCTION: Write the script content in **${lang}** (Native Script).
-        Topic: ${topic}. Category: ${cat}. Structure: Hook, Body, CTA.`;
-
-        const res = await callGemini(prompt);
+        const res = await callGemini(`Write ${document.getElementById('miniDuration').value} Reels script. Topic: ${topic}. Category: ${document.getElementById('miniCategory').value}. Language: ${lang}. Plain Text.`);
         document.getElementById('miniLoader').style.display = 'none';
-        if(res) {
-            document.getElementById('miniOutput').innerText = res;
-            addToHistory('mini', res);
-        }
+        if(res) { document.getElementById('miniOutput').innerText = res; addToHistory('mini', res); }
     }
 
-    // --- 5. YouTube Script ---
     async function generateYouTube() {
         const topic = document.getElementById('ytTopic').value;
-        const dur = document.getElementById('ytDuration').value;
-        const cat = document.getElementById('ytCategory').value;
         const lang = document.getElementById('ytLanguage').value;
-
-        if(!topic) return alert("Enter title!");
         document.getElementById('ytLoader').style.display = 'block';
-
-        const prompt = `Write a ${dur} YouTube video script.
-        STRICT INSTRUCTION: Write the script content in **${lang}** (Native Script).
-        Title: ${topic}. Category: ${cat}. Include Intro, Hook, Content, Outro.`;
-
-        const res = await callGemini(prompt);
+        const res = await callGemini(`Write ${document.getElementById('ytDuration').value} YouTube script. Title: ${topic}. Category: ${document.getElementById('ytCategory').value}. Language: ${lang}. Plain Text.`);
         document.getElementById('ytLoader').style.display = 'none';
-        if(res) {
-            document.getElementById('ytOutput').innerText = res;
-            addToHistory('yt', res);
-        }
+        if(res) { document.getElementById('ytOutput').innerText = res; addToHistory('yt', res); }
     }
 
 </script>
-
 </body>
 </html>
