@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro (Flash-Lite)</title>
+    <title>NISFF Script Writer Pro v4.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Festival Gold */
@@ -68,14 +68,14 @@
 
 <div class="app-shell">
     <div class="header">
-        <h1>NISFF Script Writer Pro (Lite)</h1>
+        <h1>NISFF Script Writer Pro v4.0</h1>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
     </div>
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Script</button>
         <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
-        <button class="tab-btn" id="btn-poster" onclick="openTab('poster')">🎨 Poster Prompt</button>
+        <button class="tab-btn" id="btn-camera" onclick="openTab('camera')">🎥 Camera & Drone Angles</button>
         <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels Video</button>
         <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Script</button>
     </div>
@@ -105,14 +105,24 @@
         <div class="input-grid">
             <div class="full-width">
                 <label>Movie Idea / Logline</label>
-                <textarea id="filmIdea" rows="3" placeholder="e.g. The Last Train Home"></textarea>
+                <textarea id="filmIdea" rows="3" placeholder="e.g. A robot learns to paint..."></textarea>
             </div>
             <div>
                 <label>Genre</label>
                 <select id="filmGenre">
-                    <option>Drama</option><option>Sci-Fi</option><option>Horror</option>
-                    <option>Comedy</option><option>Thriller</option><option>Romance</option>
-                    <option>Experimental</option><option>Documentary</option>
+                    <option>Drama</option>
+                    <option>Animation</option>
+                    <option>Sci-Fi</option>
+                    <option>Horror</option>
+                    <option>Comedy</option>
+                    <option>Thriller</option>
+                    <option>Action</option>
+                    <option>Romance</option>
+                    <option>Mystery</option>
+                    <option>Fantasy</option>
+                    <option>Experimental</option>
+                    <option>Documentary</option>
+                    <option>Musical</option>
                 </select>
             </div>
             <div>
@@ -132,7 +142,7 @@
                 <input list="languageOptions" id="filmLanguage" placeholder="Select Language">
             </div>
         </div>
-        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + POSTER</button>
+        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + SHOT LIST</button>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         <div id="filmError" class="error-msg"></div>
         <div class="output-box">
@@ -147,6 +157,10 @@
                 <label>Context (Or auto-filled)</label>
                 <textarea id="diaContext" rows="3" placeholder="Paste context here..."></textarea>
             </div>
+            <div class="full-width">
+                <label>Dialogue Language</label>
+                <input list="languageOptions" id="diaLanguage" placeholder="Select Language for Dialogue">
+            </div>
         </div>
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE ONLY</button>
         <div id="diaLoader" class="loader">CRAFTING DIALOGUES...</div>
@@ -156,18 +170,18 @@
         </div>
     </div>
 
-    <div id="poster" class="tab-content">
+    <div id="camera" class="tab-content">
         <div class="input-grid">
             <div class="full-width">
-                <label>Script Summary (Or auto-filled)</label>
-                <textarea id="posterContext" rows="2" placeholder="Summary for poster..."></textarea>
+                <label>Script Summary / Scene Context</label>
+                <textarea id="cameraContext" rows="3" placeholder="Paste scene details here..."></textarea>
             </div>
         </div>
-        <button class="action-btn" onclick="generatePoster()">GENERATE VISUAL PROMPT</button>
-        <div id="posterLoader" class="loader">DESIGNING VISUALS...</div>
+        <button class="action-btn" onclick="generateCamera()">GENERATE SHOT LIST & DRONE ANGLES</button>
+        <div id="cameraLoader" class="loader">PLANNING CINEMATOGRAPHY...</div>
         <div class="output-box">
-            <button class="copy-btn" onclick="copyText('posterOutput')">Copy</button>
-            <div id="posterOutput">No prompt yet.</div>
+            <button class="copy-btn" onclick="copyText('cameraOutput')">Copy</button>
+            <div id="cameraOutput">No shot list generated yet.</div>
         </div>
     </div>
 
@@ -186,12 +200,17 @@
                 </select>
             </div>
             <div>
-                <label>Style</label>
-                <select id="miniStyle">
-                    <option>Trending Audio / Visual</option>
-                    <option>Talking Head</option>
-                    <option>Cinematic Montage</option>
-                    <option>Comedy Skit</option>
+                <label>Category (Genre)</label>
+                <select id="miniCategory">
+                    <option>Comedy</option>
+                    <option>Horror</option>
+                    <option>Drama</option>
+                    <option>Educational / Tips</option>
+                    <option>Dance / Music</option>
+                    <option>Vlog / Lifestyle</option>
+                    <option>Motivation</option>
+                    <option>Tech / Review</option>
+                    <option>Food / Cooking</option>
                 </select>
             </div>
             <div>
@@ -211,7 +230,7 @@
         <div class="input-grid">
             <div class="full-width">
                 <label>Video Title</label>
-                <input type="text" id="ytTopic" placeholder="e.g. Short Film Budgeting Guide">
+                <input type="text" id="ytTopic" placeholder="e.g. History of Horror Movies">
             </div>
             <div>
                 <label>Duration</label>
@@ -222,13 +241,19 @@
                 </select>
             </div>
             <div>
-                <label>Category</label>
+                <label>Category (Genre)</label>
                 <select id="ytCategory">
-                    <option>Filmmaking / Tutorial</option>
-                    <option>Review / Analysis</option>
-                    <option>Vlog</option>
+                    <option>Comedy</option>
+                    <option>Horror</option>
+                    <option>Drama</option>
+                    <option>Sci-Fi / Futurist</option>
                     <option>Documentary</option>
+                    <option>Filmmaking Tutorial</option>
+                    <option>Tech Review</option>
+                    <option>Gaming</option>
                     <option>Storytime</option>
+                    <option>Vlog</option>
+                    <option>Education</option>
                 </select>
             </div>
             <div>
@@ -255,7 +280,9 @@
         const key = localStorage.getItem('nisff_key');
         if (key) document.getElementById('apiKey').value = key;
         
+        // Defaults
         document.getElementById('filmLanguage').value = "English";
+        document.getElementById('diaLanguage').value = "English";
         document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
     };
@@ -265,7 +292,6 @@
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         
-        // Handle button active state
         document.querySelectorAll('.tab-btn').forEach(btn => {
             if(btn.onclick.toString().includes(id)) {
                 btn.classList.add('active');
@@ -285,12 +311,11 @@
         alert("Copied!");
     }
 
-    // --- ROBUST API CALLER ---
+    // --- API CALLER (GEMINI 2.5 FLASH LITE) ---
     async function callGemini(prompt) {
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
-        // UPDATED MODEL: gemini-2.5-flash-lite
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         try {
@@ -299,7 +324,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    // Add safety settings to prevent blocks
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
                         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
@@ -311,24 +335,14 @@
 
             const data = await response.json();
 
-            // Check for API errors
-            if (data.error) {
-                console.error("API Error:", data.error);
-                throw new Error("API Error: " + data.error.message);
-            }
+            if (data.error) throw new Error("API Error: " + data.error.message);
+            if (!data.candidates || data.candidates.length === 0) throw new Error("No content generated.");
 
-            // Check for valid candidates (Prevents the crash)
-            if (!data.candidates || data.candidates.length === 0) {
-                console.warn("No content generated:", data);
-                throw new Error("No content generated. The AI might have blocked the request due to safety policies.");
-            }
-
-            // Return text
             return data.candidates[0].content.parts[0].text;
 
         } catch (e) {
             console.error(e);
-            if(!prompt.includes("Dialogues") && !prompt.includes("Poster")) {
+            if(!prompt.includes("Dialogues") && !prompt.includes("Cinematographer")) {
                 alert(e.message);
             }
             return null;
@@ -353,12 +367,11 @@
         errorDiv.style.display = 'none';
         output.innerText = "";
 
-        const prompt = `Act as a Professional Screenwriter for NISFF.
-        Write a Short Film Script in **${lang}**.
+        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script in **${lang}**.
         Title/Concept: ${idea}
         Genre: ${genre}
         Target Duration: ${dur}
-        Format: Standard Screenplay Format.`;
+        Format: Standard Screenplay Format (Scene Heading, Action, Character, Dialogue).`;
 
         const script = await callGemini(prompt);
         
@@ -370,13 +383,14 @@
             
             // Auto fill contexts
             document.getElementById('diaContext').value = `Based on script: ${idea} (${genre})`;
-            document.getElementById('posterContext').value = idea; 
+            document.getElementById('diaLanguage').value = lang; // Set dialogue lang
+            document.getElementById('cameraContext').value = `Cinematography for: ${idea} (${genre})`;
 
             // Trigger background tasks
             autoGenerateDialogue(script, lang);
-            autoGeneratePoster(idea, genre);
+            autoGenerateCamera(idea, genre);
         } else {
-            errorDiv.innerText = "Failed to generate script. Check API Key or try a different topic.";
+            errorDiv.innerText = "Failed to generate script. Check API Key.";
             errorDiv.style.display = 'block';
         }
     }
@@ -384,7 +398,7 @@
     // --- 2. Dialogue Generator ---
     async function autoGenerateDialogue(fullScript, lang) {
         const btn = document.getElementById('btn-dialogue');
-        const prompt = `Based on this script: "${fullScript.substring(0, 1000)}...". Extract 3 key dialogue exchanges in **${lang}**. Format: Character: [Dialogue].`;
+        const prompt = `Based on this script: "${fullScript.substring(0, 1000)}...". Extract or rewrite 3 impactful dialogue exchanges in **${lang}**. Format: Character: [Dialogue].`;
         const res = await callGemini(prompt);
         if (res) {
             document.getElementById('diaOutput').innerText = res;
@@ -394,64 +408,56 @@
 
     async function generateDialogue() {
         const context = document.getElementById('diaContext').value;
+        const lang = document.getElementById('diaLanguage').value;
         if(!context) return alert("Enter context!");
+        
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write intense movie dialogue based on: ${context}. Format as screenplay.`);
+        const res = await callGemini(`Write intense movie dialogue based on: ${context}. Language: **${lang}**. Format as screenplay.`);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) document.getElementById('diaOutput').innerText = res;
     }
 
-    // --- 3. Poster Generator (SPECIFIC FORMAT) ---
-    async function autoGeneratePoster(title, genre) {
-        const btn = document.getElementById('btn-poster');
+    // --- 3. Camera & Drone Angles (NEW) ---
+    async function autoGenerateCamera(title, genre) {
+        const btn = document.getElementById('btn-camera');
         
-        // Strict Prompt Engineering
-        const prompt = `You are an AI image prompt generator.
-        Task: Create ONE SINGLE image prompt for a movie poster.
-        Movie Title: "${title}"
-        Genre: ${genre}
-        Style: Cinematic, Award-Winning Festival Poster.
-        
-        CRITICAL RULES:
-        1. Output ONLY the final prompt string.
-        2. The output MUST start with the exact phrase: "generate a poster image of "
-        3. Do NOT add introduction text like "Here is the prompt".`;
+        const prompt = `Act as a Director of Photography (DoP).
+        For the film "${title}" (${genre}), list 5-7 creative Camera Angles and Drone Shots.
+        Format:
+        1. Shot Type (e.g., Drone High Angle, Close Up)
+        2. Description of movement and visual focus.
+        3. Why this shot enhances the ${genre} mood.`;
 
         const res = await callGemini(prompt);
         if (res) {
-            document.getElementById('posterOutput').innerText = res;
+            document.getElementById('cameraOutput').innerText = res;
             btn.classList.add('has-data');
         }
     }
 
-    async function generatePoster() {
-        const ctx = document.getElementById('posterContext').value;
-        if(!ctx) return alert("Enter summary!");
-        document.getElementById('posterLoader').style.display = 'block';
+    async function generateCamera() {
+        const ctx = document.getElementById('cameraContext').value;
+        if(!ctx) return alert("Enter scene details!");
+        document.getElementById('cameraLoader').style.display = 'block';
         
-        const prompt = `You are an AI image prompt generator.
-        Task: Create ONE SINGLE image prompt for a movie poster based on: "${ctx}".
-        
-        CRITICAL RULES:
-        1. Output ONLY the final prompt string.
-        2. The output MUST start with the exact phrase: "generate a poster image of "`;
+        const prompt = `Act as a Cinematographer. Suggest creative Camera Angles, Lens Choices, and Drone Shots for: "${ctx}". Explain the visual impact.`;
 
         const res = await callGemini(prompt);
-        document.getElementById('posterLoader').style.display = 'none';
-        if(res) document.getElementById('posterOutput').innerText = res;
+        document.getElementById('cameraLoader').style.display = 'none';
+        if(res) document.getElementById('cameraOutput').innerText = res;
     }
 
     // --- 4. Mini Video ---
     async function generateMini() {
         const topic = document.getElementById('miniTopic').value;
         const dur = document.getElementById('miniDuration').value;
-        const style = document.getElementById('miniStyle').value;
+        const cat = document.getElementById('miniCategory').value;
         const lang = document.getElementById('miniLanguage').value;
 
         if(!topic) return alert("Enter topic!");
         document.getElementById('miniLoader').style.display = 'block';
 
-        const prompt = `Write a ${dur} vertical video script (Reels/Shorts) in **${lang}**. Topic: ${topic}. Style: ${style}. Structure: Hook, Body, CTA.`;
+        const prompt = `Write a ${dur} vertical video script (Reels/Shorts) in **${lang}**. Topic: ${topic}. Category: ${cat}. Structure: Hook, Body, CTA.`;
 
         const res = await callGemini(prompt);
         document.getElementById('miniLoader').style.display = 'none';
