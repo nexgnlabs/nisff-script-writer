@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v6.4</title>
+    <title>NISFF Script Writer Pro v7.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -70,6 +70,7 @@
         h1 { margin: 0; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .api-input { background: #000; border: 1px solid var(--primary); color: #fff; padding: 8px 15px; border-radius: 20px; width: 300px; text-align: center; font-family: monospace; }
         
+        .user-badge { position: absolute; left: 0; top: 5px; font-size: 12px; color: var(--primary); font-weight: bold; }
         .logout-btn { position: absolute; right: 0; top: 0; background: #333; color: #fff; border: none; padding: 5px 10px; font-size: 12px; border-radius: 4px; }
 
         .nav-tabs { display: flex; gap: 5px; background: #000; padding: 5px; border-radius: 8px; flex-wrap: wrap; }
@@ -139,8 +140,9 @@
 <div class="app-shell hidden" id="app-main">
     <div class="header">
         <h1>NISFF Script Writer Pro</h1>
+        <span class="user-badge" id="displayUser"></span>
         <button class="logout-btn" onclick="logout()">LOGOUT</button>
-        <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
+        <input type="password" id="apiKey" class="api-input" placeholder="Enter API Key">
     </div>
 
     <div class="nav-tabs">
@@ -154,10 +156,10 @@
     <datalist id="languageOptions">
         <option value="English">English</option>
         <option value="Hindi">Hindi (हिन्दी)</option>
+        <option value="Marathi">Marathi (मराठी)</option>
         <option value="Bengali">Bengali (বাংলা)</option>
         <option value="Tamil">Tamil (தமிழ்)</option>
         <option value="Telugu">Telugu (తెలుగు)</option>
-        <option value="Marathi">Marathi (मराठी)</option>
         <option value="Urdu">Urdu (اردو)</option>
         <option value="Gujarati">Gujarati (ગુજરાતી)</option>
         <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
@@ -208,8 +210,8 @@
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         
         <div class="toolbar">
-            <select id="hist-film" style="background:#222; color:#fff; border:none; padding:5px;" onchange="restoreHistory('film')">
-                <option value="">🕒 History</option>
+            <select id="hist-film" style="background:#222; color:#aaa; border:1px solid #444; padding:5px; border-radius:4px;" onchange="restoreHistory('film')">
+                <option value="">🕒 Restore History (Last 10)</option>
             </select>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('film', ['filmIdea', 'filmLanguage', 'filmOutput'])">🗑️ Clear</button>
@@ -234,7 +236,7 @@
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE</button>
         <div id="diaLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-dia" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('dia')"><option>🕒 History</option></select>
+            <select id="hist-dia" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('dia')"><option>🕒 History</option></select>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('dia', ['diaContext', 'diaOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('diaOutput')">🖨️</button>
@@ -258,7 +260,7 @@
         <button class="action-btn" onclick="generateCamera()">GENERATE SHOT LIST</button>
         <div id="cameraLoader" class="loader">PLANNING...</div>
         <div class="toolbar">
-            <select id="hist-camera" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('camera')"><option>🕒 History</option></select>
+            <select id="hist-camera" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('camera')"><option>🕒 History</option></select>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('camera', ['cameraContext', 'cameraOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('cameraOutput')">🖨️</button>
@@ -285,8 +287,7 @@
             <div>
                 <label>Category</label>
                 <select id="miniCategory">
-                    <option>Comedy</option><option>Horror</option><option>Drama</option>
-                    <option>Educational</option><option>Vlog</option><option>Tech</option>
+                    <option>Comedy</option><option>Horror</option><option>Drama</option><option>Educational</option><option>Vlog</option><option>Tech</option>
                     <option>Animation</option><option>Action</option><option>Thriller</option>
                     <option>Dance / Music</option><option>DIY / Crafts</option><option>Fashion / Beauty</option>
                     <option>Fitness / Health</option><option>Travel</option><option>Food / Cooking</option>
@@ -303,7 +304,7 @@
         <button class="action-btn" onclick="generateMini()">GENERATE REELS</button>
         <div id="miniLoader" class="loader">CREATING...</div>
         <div class="toolbar">
-            <select id="hist-mini" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('mini')"><option>🕒 History</option></select>
+            <select id="hist-mini" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('mini')"><option>🕒 History</option></select>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('mini', ['miniTopic', 'miniOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('miniOutput')">🖨️</button>
@@ -346,7 +347,7 @@
         <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-yt" style="background:#222; color:#fff; border:none;" onchange="restoreHistory('yt')"><option>🕒 History</option></select>
+            <select id="hist-yt" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('yt')"><option>🕒 History</option></select>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('yt', ['ytTopic', 'ytOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('ytOutput')">🖨️</button>
@@ -359,23 +360,25 @@
 </div>
 
 <script>
-    // --- AUTHENTICATION ---
+    // --- AUTHENTICATION & SESSION MANAGEMENT ---
     const MASTER_USER = "nexgnlabs";
     const MASTER_PASS = "IMlegend255@";
+    let currentUser = null; // Global variable to track logged-in user
 
     window.onload = () => {
-        // 1. Check for Active Login Session
-        const session = localStorage.getItem('nisff_session');
-        if (session === 'active') {
-            document.getElementById('login-wrapper').classList.add('hidden');
-            document.getElementById('app-main').classList.remove('hidden');
-        }
-
-        // 2. Initialize Admin
+        // 1. Initialize Admin
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         if (users.length === 0) {
             users.push({ u: MASTER_USER, p: MASTER_PASS, role: 'admin' });
             localStorage.setItem('nisff_users', JSON.stringify(users));
+        }
+
+        // 2. Check for Active Login Session
+        const sessionUser = localStorage.getItem('nisff_current_user');
+        
+        if (sessionUser) {
+            currentUser = sessionUser;
+            initApp();
         }
 
         // 3. Load Key & Defaults
@@ -387,9 +390,6 @@
         document.getElementById('cameraLanguage').value = "English";
         document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
-
-        // 4. LOAD HISTORY ON REFRESH
-        ['film', 'dia', 'camera', 'mini', 'yt'].forEach(cat => updateHistoryUI(cat));
     };
 
     function handleLogin() {
@@ -400,16 +400,26 @@
         const valid = users.find(user => user.u === u && user.p === p);
 
         if (valid) {
-            localStorage.setItem('nisff_session', 'active'); // Save login
-            document.getElementById('login-wrapper').classList.add('hidden');
-            document.getElementById('app-main').classList.remove('hidden');
+            currentUser = u;
+            localStorage.setItem('nisff_current_user', u); // Persist session
+            initApp();
         } else {
             err.innerText = "Invalid Credentials";
         }
     }
 
+    function initApp() {
+        document.getElementById('login-wrapper').classList.add('hidden');
+        document.getElementById('app-main').classList.remove('hidden');
+        document.getElementById('displayUser').innerText = `User: ${currentUser}`;
+        
+        // LOAD USER-SPECIFIC HISTORY
+        ['film', 'dia', 'camera', 'mini', 'yt'].forEach(cat => updateHistoryUI(cat));
+    }
+
     function logout() { 
-        localStorage.removeItem('nisff_session'); // Clear session
+        localStorage.removeItem('nisff_current_user'); // Clear session
+        currentUser = null;
         location.reload(); 
     }
 
@@ -482,14 +492,14 @@
 
     function sanitizeOutput(text) {
         if (!text) return "";
-        return text.replace(/<[^>]*>?/gm, ''); // Removes HTML tags
+        return text.replace(/<[^>]*>?/gm, ''); 
     }
 
     async function callGemini(prompt) {
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
 
         try {
             const response = await fetch(url, {
@@ -525,34 +535,55 @@
         }
     }
 
-    // --- HISTORY ---
+    // --- USER-SPECIFIC HISTORY ---
+    function getHistoryKey(category) {
+        if (!currentUser) return `nisff_hist_${category}`;
+        return `nisff_hist_${currentUser}_${category}`;
+    }
+
     function addToHistory(category, text) {
-        let hist = JSON.parse(localStorage.getItem('nisff_hist') || '{}');
-        if(!hist[category]) hist[category] = [];
-        hist[category].unshift({ time: new Date().toLocaleTimeString(), full: text });
-        if(hist[category].length > 5) hist[category].pop();
-        localStorage.setItem('nisff_hist', JSON.stringify(hist));
+        if (!currentUser) return; // Safety check
+        const storageKey = getHistoryKey(category);
+        
+        let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        
+        const timestamp = new Date().toLocaleString();
+        hist.unshift({ time: timestamp, full: text });
+        
+        // Limit to 10 items
+        if(hist.length > 10) hist.pop();
+        
+        localStorage.setItem(storageKey, JSON.stringify(hist));
         updateHistoryUI(category);
     }
 
     function updateHistoryUI(category) {
-        let hist = JSON.parse(localStorage.getItem('nisff_hist') || '{}');
-        const list = hist[category] || [];
+        if (!currentUser) return;
+        const storageKey = getHistoryKey(category);
+        
+        let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
         const select = document.getElementById(`hist-${category}`);
-        select.innerHTML = '<option value="">🕒 History</option>';
-        list.forEach((item, index) => {
+        
+        select.innerHTML = '<option value="">🕒 Restore History (Last 10)</option>';
+        hist.forEach((item, index) => {
             const opt = document.createElement('option');
-            opt.value = index; opt.text = item.time;
+            opt.value = index; 
+            opt.text = `${item.time} - ${item.full.substring(0, 20)}...`;
             select.appendChild(opt);
         });
     }
 
     function restoreHistory(category) {
         const select = document.getElementById(`hist-${category}`);
-        if(select.value === "") return;
-        let hist = JSON.parse(localStorage.getItem('nisff_hist'));
+        const index = select.value;
+        if(index === "") return;
+
+        const storageKey = getHistoryKey(category);
+        let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const item = hist[index];
+        
         const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'camera': 'cameraOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
-        document.getElementById(idMap[category]).innerText = hist[category][select.value].full;
+        document.getElementById(idMap[category]).innerText = item.full;
     }
 
     // --- GENERATORS ---
@@ -576,6 +607,7 @@
         if(script) {
             document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
+            // Autofill
             document.getElementById('diaContext').value = `Script: ${idea}`;
             document.getElementById('diaLanguage').value = lang;
             document.getElementById('cameraContext').value = `Script: ${idea}`;
