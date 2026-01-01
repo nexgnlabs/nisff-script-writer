@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v11.0</title>
+    <title>NISFF Script Writer Pro v11.1</title>
     <style>
         :root {
-            --primary: #d4af37; /* Festival Gold */
+            --primary: #d4af37; /* Gold */
             --bg: #050505;
             --card: #141414;
             --text: #e0e0e0;
@@ -48,8 +48,19 @@
         .login-btn:hover { background: #fff; }
 
         /* Dashboard */
-        .app-shell { max-width: 1200px; margin: 20px auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; height: 90vh; display: flex; flex-direction: column; position: relative; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
+        .app-shell { max-width: 1200px; margin: 20px auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; height: 90vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        
+        /* NEXGN Watermark */
+        .nexgn-watermark {
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 150px; font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            pointer-events: none; z-index: 0;
+            letter-spacing: 10px; user-select: none;
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px; z-index: 1; position: relative; }
         h1 { margin: 0; font-size: 22px; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; }
         
         .user-controls { display: flex; align-items: center; gap: 15px; position: relative; }
@@ -68,12 +79,12 @@
         .key-input { width: 100%; background: #000; border: 1px solid #444; color: var(--success); padding: 8px; border-radius: 4px; font-family: monospace; box-sizing: border-box; }
 
         /* Tabs */
-        .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+        .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; z-index: 1; position: relative; }
         .tab-btn { flex: 1; padding: 12px; background: #111; border: 1px solid #333; color: #888; border-radius: 6px; transition: 0.3s; position: relative; }
         .tab-btn.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
         .tab-btn:hover { background: #222; color: #fff; }
 
-        .tab-content { display: none; padding: 10px; flex-grow: 1; overflow-y: auto; }
+        .tab-content { display: none; padding: 10px; flex-grow: 1; overflow-y: auto; z-index: 1; position: relative; }
         .tab-content.active { display: block; }
 
         /* Inputs */
@@ -110,6 +121,8 @@
 </div>
 
 <div class="app-shell hidden" id="app-main">
+    <div class="nexgn-watermark">NEXGN</div>
+    
     <div class="header">
         <h1>NISFF Script Writer Pro <span class="reel-icon">🎞️</span></h1>
         <div class="user-controls">
@@ -133,7 +146,7 @@
         <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film</button>
         <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue</button>
         <button class="tab-btn" id="btn-cinematography" onclick="openTab('cinematography')">🎥 Cinematography</button>
-        <button class="tab-btn" onclick="openTab('mini')">📱 Reels/Mini</button>
+        <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels</button>
         <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube</button>
     </div>
 
@@ -506,13 +519,28 @@
         
         document.getElementById('filmLoader').style.display = 'block';
         
-        const prompt = `Write a professional Short Film Script.
-        Title: ${idea}. Genre: ${genre}. Duration: ${dur}.
+        // REINFORCED PROMPT FOR STRICT LANGUAGE & FORMAT
+        const prompt = `Act as a Professional Screenwriter.
+        Task: Write a complete Short Film Script.
         
-        STRICT LANGUAGE REQUIREMENT: The entire script (Dialogue and Action) MUST be written in **${lang}** using ${lang} script. 
-        English is FORBIDDEN except for Scene Headers (INT/EXT).
+        CRITICAL RULES:
+        1. **STRICTLY USE ${lang} LANGUAGE**. 
+        2. The Title, Logline, Action Lines, and Dialogue MUST represent the ${lang} language naturally (use Native Script e.g., Devanagari/Bengali script).
+        3. Do NOT include any HTML tags like <center>. Use purely text-based formatting.
+        4. Do NOT translate back to English.
         
-        Format: Standard Screenplay. NO HTML TAGS. Plain Text Only.`;
+        REQUIRED FORMAT:
+        TITLE: [Title in ${lang}]
+        LOGLINE: [Logline in ${lang}]
+        
+        SCENE 1
+        [Scene Heading]
+        [Action]
+        [CHARACTER NAME]: [Dialogue]
+        
+        Story Idea: ${idea}
+        Genre: ${genre}
+        Duration: ${dur}`;
 
         const script = await callGemini(prompt);
         document.getElementById('filmLoader').style.display = 'none';
@@ -553,7 +581,7 @@
         const ctx = document.getElementById('diaContext').value;
         const lang = document.getElementById('diaLanguage').value;
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write dialogues for: ${ctx}. Language: **${lang}**. Plain Text.`);
+        const res = await callGemini(`Write dialogues for: ${ctx}. Language: **${lang}**. Plain Text. NO HTML.`);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) document.getElementById('diaOutput').innerText = res;
     }
