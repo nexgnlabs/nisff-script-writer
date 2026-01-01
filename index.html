@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v7.0</title>
+    <title>NISFF Script Writer Pro v7.1</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -20,6 +20,16 @@
         .hidden { display: none !important; }
         button { cursor: pointer; }
 
+        /* --- ANIMATIONS --- */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .reel-icon {
+            display: inline-block;
+            font-size: 24px;
+            margin-left: 10px;
+            animation: spin 4s linear infinite; /* Slow revolving effect */
+        }
+
         /* --- LOGIN & ADMIN --- */
         #login-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -30,11 +40,15 @@
 
         .login-box {
             background: var(--card); padding: 40px; border-radius: 12px;
-            border: 1px solid var(--primary); text-align: center; width: 350px;
+            border: 1px solid var(--primary); text-align: center; width: 400px;
             box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
         }
 
-        .login-box h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 2px; }
+        .login-box h2 { 
+            color: var(--primary); margin-bottom: 30px; letter-spacing: 1px; font-size: 20px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
         .login-input {
             width: 100%; padding: 12px; margin-bottom: 15px; background: #222;
             border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;
@@ -67,7 +81,12 @@
         }
 
         .header { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; position: relative; }
-        h1 { margin: 0; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h1 { 
+            margin: 0; background: linear-gradient(45deg, #fff, var(--primary)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        
         .api-input { background: #000; border: 1px solid var(--primary); color: #fff; padding: 8px 15px; border-radius: 20px; width: 300px; text-align: center; font-family: monospace; }
         
         .user-badge { position: absolute; left: 0; top: 5px; font-size: 12px; color: var(--primary); font-weight: bold; }
@@ -116,7 +135,7 @@
 
 <div id="login-wrapper">
     <div class="login-box">
-        <h2>NISFF PRO</h2>
+        <h2>NISFF SCRIPT WRITER PRO v7.1 <span class="reel-icon">🎞️</span></h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
@@ -139,10 +158,11 @@
 
 <div class="app-shell hidden" id="app-main">
     <div class="header">
-        <h1>NISFF Script Writer Pro</h1>
+        <h1>NISFF Script Writer Pro <span class="reel-icon">🎞️</span></h1>
         <span class="user-badge" id="displayUser"></span>
         <button class="logout-btn" onclick="logout()">LOGOUT</button>
-        <input type="password" id="apiKey" class="api-input" placeholder="Enter API Key">
+        
+        <input type="password" id="apiKey" class="api-input" placeholder="Enter Your Key">
     </div>
 
     <div class="nav-tabs">
@@ -288,8 +308,7 @@
                 <label>Category</label>
                 <select id="miniCategory">
                     <option>Comedy</option><option>Horror</option><option>Drama</option><option>Educational</option><option>Vlog</option><option>Tech</option>
-                    <option>Animation</option><option>Action</option><option>Thriller</option>
-                    <option>Dance / Music</option><option>DIY / Crafts</option><option>Fashion / Beauty</option>
+                    <option>Animation</option><option>Action</option><option>Thriller</option><option>Dance / Music</option><option>DIY / Crafts</option><option>Fashion / Beauty</option>
                     <option>Fitness / Health</option><option>Travel</option><option>Food / Cooking</option>
                     <option>Life Hacks</option><option>Behind the Scenes</option><option>Challenges</option>
                     <option>Motivational</option><option>Gaming</option>
@@ -363,7 +382,7 @@
     // --- AUTHENTICATION & SESSION MANAGEMENT ---
     const MASTER_USER = "nexgnlabs";
     const MASTER_PASS = "IMlegend255@";
-    let currentUser = null; // Global variable to track logged-in user
+    let currentUser = null; 
 
     window.onload = () => {
         // 1. Initialize Admin
@@ -375,7 +394,6 @@
 
         // 2. Check for Active Login Session
         const sessionUser = localStorage.getItem('nisff_current_user');
-        
         if (sessionUser) {
             currentUser = sessionUser;
             initApp();
@@ -499,7 +517,8 @@
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+        // Using Gemini 2.5 Flash Lite
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         try {
             const response = await fetch(url, {
@@ -542,7 +561,7 @@
     }
 
     function addToHistory(category, text) {
-        if (!currentUser) return; // Safety check
+        if (!currentUser) return; 
         const storageKey = getHistoryKey(category);
         
         let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
