@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v7.2</title>
+    <title>NISFF Script Writer Pro v9.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -12,9 +12,7 @@
             --text: #e0e0e0;
             --border: #333;
             --success: #00e676;
-            --char-color: #4fc3f7; /* Cyan for Characters */
-            --scene-color: #ffd700; /* Gold for Scenes */
-            --trans-color: #ff5252; /* Red for Transitions */
+            --error: #ff5252;
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 0; margin: 0; height: 100vh; overflow: hidden; }
@@ -31,9 +29,11 @@
             margin-left: 10px;
             animation: spin 4s linear infinite;
             vertical-align: middle;
+            cursor: default; /* Hide clickability */
+            user-select: none;
         }
 
-        /* --- LOGIN & ADMIN --- */
+        /* --- LOGIN SCREEN --- */
         #login-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 1000;
@@ -63,8 +63,7 @@
         }
         .login-btn:hover { background: #fff; }
 
-        .admin-toggle { margin-top: 20px; font-size: 12px; color: #666; text-decoration: underline; cursor: pointer; }
-
+        /* --- ADMIN PANEL (SECRET) --- */
         #admin-panel {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #1a1a1a; padding: 30px; border: 1px solid var(--success);
@@ -75,7 +74,7 @@
         .user-list { max-height: 150px; overflow-y: auto; background: #111; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
         .user-item { font-size: 12px; padding: 5px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
 
-        /* --- APP MAIN --- */
+        /* --- APP SHELL --- */
         .app-shell { 
             max-width: 1200px; margin: 20px auto; background: var(--card); 
             border: 1px solid var(--border); border-radius: 12px; padding: 20px; 
@@ -94,7 +93,7 @@
         
         .user-badge { position: absolute; left: 0; top: 5px; font-size: 12px; color: var(--primary); font-weight: bold; }
         
-        /* Materialistic Logout Button */
+        /* Materialistic Logout */
         .logout-btn { 
             position: absolute; right: 0; top: 0; 
             background: #d32f2f; color: #fff; 
@@ -137,15 +136,15 @@
         .sm-btn { background: #333; color: #fff; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; font-size: 11px; }
         .sm-btn:hover { background: #555; }
         .clear-btn { background: #c62828; border-color: #b71c1c; }
-        .clear-btn:hover { background: #b71c1c; }
+        .del-btn { background: #b00020; border-color: #790000; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 
-        .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 10px; min-height: 250px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 15px; line-height: 1.6; color: #ccc; }
-        
-        /* SYNTAX HIGHLIGHTING CLASSES */
-        .sc-scene { color: var(--scene-color); font-weight: bold; text-decoration: underline; display: block; margin-top: 15px; margin-bottom: 5px; }
-        .sc-char { color: var(--char-color); font-weight: bold; display: block; margin-top: 10px; text-align: center; }
-        .sc-trans { color: var(--trans-color); font-style: italic; text-align: right; display: block; }
-        .sc-paren { color: #888; font-style: italic; display: block; text-align: center; font-size: 0.9em; }
+        /* Output Boxes (Plain Text) */
+        .output-box { 
+            background: #000; border: 1px solid var(--border); padding: 20px; 
+            border-radius: 8px; margin-top: 10px; min-height: 250px; 
+            white-space: pre-wrap; font-family: 'Courier New', monospace; 
+            font-size: 15px; line-height: 1.6; color: #ccc; 
+        }
         
         .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
@@ -155,13 +154,11 @@
 
 <div id="login-wrapper">
     <div class="login-box">
-        <h2>NISFF SCRIPT WRITER PRO v7.2 <span class="reel-icon">🎞️</span></h2>
+        <h2>NISFF SCRIPT WRITER PRO v8.1 <span class="reel-icon" ondblclick="toggleAdminPanel()">🎞️</span></h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
         <div id="loginError" style="color:var(--error); margin-top:10px; font-size:12px;"></div>
-        
-        <div class="admin-toggle" onclick="toggleAdminPanel()">Admin Panel (Restricted)</div>
     </div>
 </div>
 
@@ -178,7 +175,7 @@
 
 <div class="app-shell hidden" id="app-main">
     <div class="header">
-        <h1>NISFF SCRIPT WRITER PRO v7.2 <span class="reel-icon">🎞️</span></h1>
+        <h1>NISFF Script Writer Pro <span class="reel-icon">🎞️</span></h1>
         <span class="user-badge" id="displayUser"></span>
         <button class="logout-btn" onclick="logout()">LOGOUT</button>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Your Key">
@@ -235,13 +232,9 @@
             <div>
                 <label>Duration</label>
                 <select id="filmDuration">
-                    <option value="10 Minutes">10 Minutes</option>
-                    <option value="15 Minutes">15 Minutes</option>
-                    <option value="20 Minutes">20 Minutes</option>
-                    <option value="25 Minutes">25 Minutes</option>
-                    <option value="30 Minutes">30 Minutes</option>
-                    <option value="35 Minutes">35 Minutes</option>
-                    <option value="40 Minutes">40 Minutes</option>
+                    <option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option>
+                    <option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option>
+                    <option>40 Minutes</option>
                 </select>
             </div>
             <div>
@@ -254,8 +247,9 @@
         
         <div class="toolbar">
             <select id="hist-film" style="background:#222; color:#aaa; border:1px solid #444; padding:5px; border-radius:4px;" onchange="restoreHistory('film')">
-                <option value="">🕒 History</option>
+                <option value="">🕒 Restore History...</option>
             </select>
+            <button class="del-btn" onclick="deleteHistoryItem('film')" title="Delete selected history">❌</button>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('film', ['filmIdea', 'filmLanguage', 'filmOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
@@ -280,6 +274,7 @@
         <div id="diaLoader" class="loader">WRITING...</div>
         <div class="toolbar">
             <select id="hist-dia" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('dia')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('dia', ['diaContext', 'diaOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('diaOutput')">🖨️</button>
@@ -304,6 +299,7 @@
         <div id="cameraLoader" class="loader">PLANNING...</div>
         <div class="toolbar">
             <select id="hist-camera" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('camera')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('camera')">❌</button>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('camera', ['cameraContext', 'cameraOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('cameraOutput')">🖨️</button>
@@ -347,6 +343,7 @@
         <div id="miniLoader" class="loader">CREATING...</div>
         <div class="toolbar">
             <select id="hist-mini" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('mini')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('mini')">❌</button>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('mini', ['miniTopic', 'miniOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('miniOutput')">🖨️</button>
@@ -390,6 +387,7 @@
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
             <select id="hist-yt" style="background:#222; color:#aaa; border:1px solid #444;" onchange="restoreHistory('yt')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
             <div class="tool-group">
                 <button class="sm-btn clear-btn" onclick="clearTab('yt', ['ytTopic', 'ytOutput'])">🗑️ Clear</button>
                 <button class="sm-btn" onclick="printArea('ytOutput')">🖨️</button>
@@ -402,23 +400,29 @@
 </div>
 
 <script>
-    const MASTER_USER = "nexgnlabs";
-    const MASTER_PASS = "IMlegend255@";
+    // --- AUTHENTICATION & SECURITY ---
+    // Hardcoded Base64 Encoded Credentials to obscure them
+    // username: nexgnlabs, password: IMlegend255@
+    const AUTH_HASH = { u: "bmV4Z25sYWJz", p: "SU1sZWdlbmQyNTVA" }; 
     let currentUser = null; 
 
     window.onload = () => {
+        // Init Admin if not exists
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         if (users.length === 0) {
-            users.push({ u: MASTER_USER, p: MASTER_PASS, role: 'admin' });
+            // Decoding the hardcoded values to save initially
+            users.push({ u: atob(AUTH_HASH.u), p: atob(AUTH_HASH.p), role: 'admin' });
             localStorage.setItem('nisff_users', JSON.stringify(users));
         }
 
+        // Check Session
         const sessionUser = localStorage.getItem('nisff_current_user');
         if (sessionUser) {
             currentUser = sessionUser;
             initApp();
         }
 
+        // Defaults
         const key = localStorage.getItem('nisff_key');
         if (key) document.getElementById('apiKey').value = key;
         
@@ -434,6 +438,8 @@
         const p = document.getElementById('loginPass').value;
         const err = document.getElementById('loginError');
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        
+        // Simple authentication check
         const valid = users.find(user => user.u === u && user.p === p);
 
         if (valid) {
@@ -454,16 +460,18 @@
 
     function logout() { 
         localStorage.removeItem('nisff_current_user');
-        currentUser = null;
         location.reload(); 
     }
 
+    // --- ADMIN PANEL ---
     function toggleAdminPanel() {
         const panel = document.getElementById('admin-panel');
         if (panel.style.display === 'none' || panel.style.display === '') {
-            const u = prompt("Enter Admin Username:");
-            const p = prompt("Enter Admin Password:");
-            if (u === MASTER_USER && p === MASTER_PASS) {
+            // Use obfuscated credentials for validation logic
+            const u = prompt("Admin Username:");
+            const p = prompt("Admin Password:");
+            
+            if (u === atob(AUTH_HASH.u) && p === atob(AUTH_HASH.p)) {
                 renderUserList();
                 panel.style.display = 'block';
             } else { alert("Access Denied"); }
@@ -487,6 +495,7 @@
         alert("User Created!"); renderUserList();
     }
 
+    // --- APP LOGIC ---
     function openTab(id) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -505,11 +514,7 @@
         return key;
     }
 
-    function copyText(id) { 
-        const text = document.getElementById(id).innerText; 
-        navigator.clipboard.writeText(text); 
-        alert("Copied!"); 
-    }
+    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); alert("Copied!"); }
 
     function clearTab(tabId, idsToClear) {
         if(confirm("Clear this tab?")) {
@@ -521,31 +526,17 @@
     }
 
     function printArea(id) {
-        const content = document.getElementById(id).innerHTML;
+        const content = document.getElementById(id).innerText; // Print plain text
         const win = window.open('', '', 'height=700,width=900');
         win.document.write(`<html><head><title>Print Script</title><style>body{font-family:'Courier New', monospace; padding:40px; white-space: pre-wrap; font-size:14px;}</style></head><body>${content}</body></html>`);
         win.document.close(); win.print();
-    }
-
-    // --- COLORIZER / SANITIZER ---
-    function formatScriptOutput(text) {
-        if (!text) return "";
-        let formatted = text
-            // Parse custom tags into HTML with color classes
-            .replace(/\[SCENE\](.*?)\[\/SCENE\]/g, '<span class="sc-scene">$1</span>')
-            .replace(/\[CHAR\](.*?)\[\/CHAR\]/g, '<span class="sc-char">$1</span>')
-            .replace(/\[TRANS\](.*?)\[\/TRANS\]/g, '<span class="sc-trans">$1</span>')
-            .replace(/\((.*?)\)/g, '<span class="sc-paren">($1)</span>'); // Parentheticals
-        
-        // Remove markdown bold chars if any remain
-        formatted = formatted.replace(/\*\*/g, '');
-        return formatted;
     }
 
     async function callGemini(prompt) {
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
+        // LOCKING TO GEMINI 2.5 FLASH LITE
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         try {
@@ -567,7 +558,8 @@
             if (data.error) { alert("API Error: " + data.error.message); return null; }
             if (!data.candidates || data.candidates.length === 0) { alert("Generation Error: No content returned."); return null; }
 
-            return formatScriptOutput(data.candidates[0].content.parts[0].text);
+            // PLAIN TEXT OUTPUT ONLY
+            return data.candidates[0].content.parts[0].text;
 
         } catch (e) {
             console.error(e);
@@ -576,7 +568,7 @@
         }
     }
 
-    // --- HISTORY ---
+    // --- USER HISTORY (WITH DELETE) ---
     function getHistoryKey(category) {
         if (!currentUser) return `nisff_hist_${category}`;
         return `nisff_hist_${currentUser}_${category}`;
@@ -587,8 +579,6 @@
         const storageKey = getHistoryKey(category);
         let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
         const timestamp = new Date().toLocaleString();
-        
-        // Save plain text snippet for dropdown, full HTML for restore
         hist.unshift({ time: timestamp, full: text });
         if(hist.length > 10) hist.pop();
         localStorage.setItem(storageKey, JSON.stringify(hist));
@@ -603,8 +593,7 @@
         select.innerHTML = '<option value="">🕒 Restore History (Last 10)</option>';
         hist.forEach((item, index) => {
             const opt = document.createElement('option');
-            opt.value = index; 
-            opt.text = `${item.time}`;
+            opt.value = index; opt.text = item.time;
             select.appendChild(opt);
         });
     }
@@ -616,22 +605,36 @@
         const storageKey = getHistoryKey(category);
         let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
         const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'camera': 'cameraOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
-        document.getElementById(idMap[category]).innerHTML = hist[index].full;
+        document.getElementById(idMap[category]).innerText = hist[index].full;
     }
 
-    // --- PROMPT TEMPLATES ---
-    
-    // Helper to enforce language and formatting
+    function deleteHistoryItem(category) {
+        const select = document.getElementById(`hist-${category}`);
+        const index = select.value;
+        
+        if (index === "") return alert("Please select a history item first.");
+        
+        if(confirm("Delete this history item?")) {
+            const storageKey = getHistoryKey(category);
+            let hist = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            hist.splice(index, 1);
+            localStorage.setItem(storageKey, JSON.stringify(hist));
+            
+            // Clear current view
+            const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'camera': 'cameraOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
+            document.getElementById(idMap[category]).innerText = "";
+            
+            updateHistoryUI(category);
+        }
+    }
+
+    // --- PROMPT TEMPLATES (STRICT LANGUAGE) ---
     const getStrictInstructions = (lang) => {
         return `
-        STRICT LANGUAGE RULE: The main content (Dialogue, Action Lines, Descriptions) MUST be written in **${lang}** using the native ${lang} script (e.g., Devanagari for Hindi). Do NOT use English/Roman script for the content.
-        
-        STRICT FORMATTING RULE: 
-        You MUST use the following tags for specific elements so I can color them:
-        - Wrap SCENE HEADINGS in [SCENE]...[/SCENE]
-        - Wrap CHARACTER NAMES in [CHAR]...[/CHAR]
-        - Wrap TRANSITIONS (CUT TO:) in [TRANS]...[/TRANS]
-        - Do not wrap Dialogue or Action.
+        STRICT LANGUAGE ENFORCEMENT:
+        1. The generated script/content MUST be entirely in **${lang}** using its native script/characters.
+        2. English should ONLY be used for formatting (like INT./EXT., FADE IN) or proper nouns if absolutely necessary.
+        3. Do not provide an English translation.
         `;
     };
 
@@ -646,16 +649,14 @@
         
         const prompt = `Act as a Professional Screenwriter. Write a Short Film Script.
         Title: ${idea}. Genre: ${genre}. Duration: ${dur}.
-        
         ${getStrictInstructions(lang)}
-        
-        Start the script now.`;
+        Format: Standard Screenplay (Plain Text, No HTML). Use UPPERCASE for character names.`;
 
         const script = await callGemini(prompt);
         document.getElementById('filmLoader').style.display = 'none';
         
         if(script) {
-            document.getElementById('filmOutput').innerHTML = script;
+            document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
             // Autofill
             document.getElementById('diaContext').value = `Script: ${idea}`;
@@ -670,14 +671,9 @@
 
     async function autoGenerateDialogue(fullScript, lang) {
         const btn = document.getElementById('btn-dialogue');
-        // Clean tags for context to avoid confusion
-        const cleanScript = fullScript.replace(/<[^>]*>?/gm, '');
-        const prompt = `Based on this script: "${cleanScript.substring(0,1000)}...". 
-        Extract 3 key dialogues. ${getStrictInstructions(lang)}`;
-        
-        const res = await callGemini(prompt);
+        const res = await callGemini(`Extract 3 key dialogues from this script: "${fullScript.substring(0,500)}...". ${getStrictInstructions(lang)}`);
         if(res) {
-            document.getElementById('diaOutput').innerHTML = res;
+            document.getElementById('diaOutput').innerText = res;
             addToHistory('dia', res);
             btn.classList.add('has-data');
         }
@@ -687,19 +683,16 @@
         const context = document.getElementById('diaContext').value;
         const lang = document.getElementById('diaLanguage').value;
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write dialogue for: ${context}. ${getStrictInstructions(lang)}`);
+        const res = await callGemini(`Write movie dialogue for: ${context}. ${getStrictInstructions(lang)}`);
         document.getElementById('diaLoader').style.display = 'none';
-        if(res) { document.getElementById('diaOutput').innerHTML = res; addToHistory('dia', res); }
+        if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
     }
 
     async function autoGenerateCamera(title, genre, lang) {
         const btn = document.getElementById('btn-camera');
-        const prompt = `List 5 Camera/Drone shots for "${title}". 
-        STRICT LANGUAGE: Descriptions MUST be in ${lang}. 
-        Format: [SCENE]Shot Type[/SCENE]: Description.`;
-        const res = await callGemini(prompt);
+        const res = await callGemini(`List 5 Camera/Drone shots for film "${title}". ${getStrictInstructions(lang)}`);
         if(res) {
-            document.getElementById('cameraOutput').innerHTML = res;
+            document.getElementById('cameraOutput').innerText = res;
             addToHistory('camera', res);
             btn.classList.add('has-data');
         }
@@ -709,9 +702,9 @@
         const ctx = document.getElementById('cameraContext').value;
         const lang = document.getElementById('cameraLanguage').value;
         document.getElementById('cameraLoader').style.display = 'block';
-        const res = await callGemini(`Suggest Camera/Drone shots for: ${ctx}. STRICT LANGUAGE: Descriptions in ${lang}. Format: [SCENE]Shot Type[/SCENE]: Description.`);
+        const res = await callGemini(`Suggest Camera/Drone shots for: ${ctx}. ${getStrictInstructions(lang)}`);
         document.getElementById('cameraLoader').style.display = 'none';
-        if(res) { document.getElementById('cameraOutput').innerHTML = res; addToHistory('camera', res); }
+        if(res) { document.getElementById('cameraOutput').innerText = res; addToHistory('camera', res); }
     }
 
     async function generateMini() {
@@ -720,7 +713,7 @@
         document.getElementById('miniLoader').style.display = 'block';
         const res = await callGemini(`Write ${document.getElementById('miniDuration').value} Reels script. Topic: ${topic}. Category: ${document.getElementById('miniCategory').value}. ${getStrictInstructions(lang)}`);
         document.getElementById('miniLoader').style.display = 'none';
-        if(res) { document.getElementById('miniOutput').innerHTML = res; addToHistory('mini', res); }
+        if(res) { document.getElementById('miniOutput').innerText = res; addToHistory('mini', res); }
     }
 
     async function generateYouTube() {
@@ -729,7 +722,7 @@
         document.getElementById('ytLoader').style.display = 'block';
         const res = await callGemini(`Write ${document.getElementById('ytDuration').value} YouTube script. Title: ${topic}. Category: ${document.getElementById('ytCategory').value}. ${getStrictInstructions(lang)}`);
         document.getElementById('ytLoader').style.display = 'none';
-        if(res) { document.getElementById('ytOutput').innerHTML = res; addToHistory('yt', res); }
+        if(res) { document.getElementById('ytOutput').innerText = res; addToHistory('yt', res); }
     }
 
 </script>
