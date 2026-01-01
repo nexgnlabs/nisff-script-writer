@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXGN Script Writer Pro v13.0</title>
+    <title>NEXGN Script Writer Pro v14.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -92,7 +92,7 @@
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .full-width { grid-column: span 3; }
         label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; }
+        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
         
         .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; margin-top: 10px; }
         
@@ -116,7 +116,7 @@
 
 <div id="login-wrapper">
     <div class="login-box">
-        <h2>NEXGN SCRIPT WRITER PRO v13.0 <span class="reel-icon">🎞️</span></h2>
+        <h2>NEXGN SCRIPT WRITER PRO v14.0 <span class="reel-icon">🎞️</span></h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
@@ -148,9 +148,9 @@
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film</button>
-        <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue</button>
         <button class="tab-btn" id="btn-cinematography" onclick="openTab('cinematography')">🎥 Cinematography</button>
-        <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels</button>
+        <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
+        <button class="tab-btn" onclick="openTab('improve')">✨ Script Improvement</button>
         <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube</button>
     </div>
 
@@ -178,6 +178,7 @@
         <option value="Manipuri">Manipuri (মণিপুরী)</option>
         <option value="Bodo">Bodo (बर')</option>
         <option value="Sanskrit">Sanskrit (संस्कृत)</option>
+        <option value="Hinglish">Hinglish (Hindi in English Script)</option>
     </datalist>
 
     <div id="film" class="tab-content active">
@@ -199,19 +200,16 @@
                 <label>Duration</label>
                 <select id="filmDuration">
                     <option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option>
-                    <option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option><option>40 Minutes</option>
+                    <option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option>
+                    <option>40 Minutes</option>
                 </select>
             </div>
             <div>
-                <label>Spoken Language (Dialect)</label>
-                <input list="languageOptions" id="filmAudioLang" placeholder="e.g. Mumbai Hindi">
-            </div>
-            <div>
-                <label>Script Output Format</label>
-                <input list="languageOptions" id="filmScriptLang" placeholder="e.g. English">
+                <label>Script Language</label>
+                <input list="languageOptions" id="filmLanguage" placeholder="Select Language">
             </div>
         </div>
-        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + ASSETS</button>
+        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + AUTO CINEMATOGRAPHY</button>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         <div class="toolbar">
             <select id="hist-film" class="history-select" onchange="restoreHistory('film')"><option value="">🕒 Recent Scripts</option></select>
@@ -225,35 +223,15 @@
         <div id="filmOutput" class="output-box"></div>
     </div>
 
-    <div id="dialogue" class="tab-content">
-        <div class="input-grid">
-            <div class="full-width"><label>Context</label><textarea id="diaContext" rows="3"></textarea></div>
-            <div><label>Spoken Language</label><input list="languageOptions" id="diaAudioLang"></div>
-            <div><label>Script Format</label><input list="languageOptions" id="diaScriptLang"></div>
-        </div>
-        <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
-        <div id="diaLoader" class="loader">WRITING...</div>
-        <div class="toolbar">
-            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option>🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
-            <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
-            </div>
-        </div>
-        <div id="diaOutput" class="output-box"></div>
-    </div>
-
     <div id="cinematography" class="tab-content">
         <div class="input-grid">
-            <div class="full-width"><label>Script Context</label><textarea id="cineContext" rows="3"></textarea></div>
-            <div class="full-width"><label>Output Language</label><input list="languageOptions" id="cineLanguage"></div>
+            <div class="full-width"><label>Script Context</label><textarea id="cineContext" rows="3" placeholder="Context..."></textarea></div>
+            <div class="full-width"><label>Output Language</label><input list="languageOptions" id="cineLanguage" placeholder="Select Language"></div>
         </div>
-        <button class="action-btn" onclick="generateCinematography()">GENERATE SHOTS</button>
-        <div id="cineLoader" class="loader">PLANNING...</div>
+        <button class="action-btn" onclick="generateCinematography()">GENERATE SHOT LIST</button>
+        <div id="cineLoader" class="loader">PLANNING SHOTS...</div>
         <div class="toolbar">
-            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option>🕒 Recent Scripts</option></select>
+            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('cine')">❌</button>
             <div class="tool-group">
                 <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
@@ -264,43 +242,64 @@
         <div id="cineOutput" class="output-box"></div>
     </div>
 
-    <div id="mini" class="tab-content">
+    <div id="dialogue" class="tab-content">
         <div class="input-grid">
-            <div class="full-width"><label>Topic</label><input type="text" id="miniTopic"></div>
-            <div><label>Duration</label><select id="miniDuration">
-                <option>20 Seconds</option><option>30 Seconds</option><option>40 Seconds</option>
-                <option>50 Seconds</option><option>60 Seconds</option>
-            </select></div>
-            <div><label>Category</label><select id="miniCategory"><option>Comedy</option><option>Tech</option><option>Education</option></select></div>
-            <div><label>Spoken Language</label><input list="languageOptions" id="miniAudioLang"></div>
-            <div><label>Script Format</label><input list="languageOptions" id="miniScriptLang"></div>
+            <div class="full-width"><label>Context / Scene Summary</label><textarea id="diaContext" rows="3" placeholder="Paste context here..."></textarea></div>
+            <div><label>Spoken Language</label><input list="languageOptions" id="diaAudioLang"></div>
+            <div><label>Script Format</label><input list="languageOptions" id="diaScriptLang"></div>
         </div>
-        <button class="action-btn" onclick="generateMini()">GENERATE REELS</button>
-        <div id="miniLoader" class="loader">CREATING...</div>
+        <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
+        <div id="diaLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-mini" class="history-select" onchange="restoreHistory('mini')"><option>🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('mini')">❌</button>
+            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
             <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('miniOutput', 'miniTopic')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('miniOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('miniOutput')">📋 Copy</button>
+                <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
             </div>
         </div>
-        <div id="miniOutput" class="output-box"></div>
+        <div id="diaOutput" class="output-box"></div>
+    </div>
+
+    <div id="improve" class="tab-content">
+        <div class="input-grid">
+            <div class="full-width">
+                <label>Paste Existing Script</label>
+                <textarea id="improveInput" rows="5" placeholder="Paste script here..."></textarea>
+            </div>
+            <div><label>Instruction</label><select id="improveType">
+                <option>Fix Grammar & Formatting</option>
+                <option>Enhance Emotional Depth</option>
+                <option>Make Dialogues Punchier</option>
+                <option>Shorten / Tighten Pacing</option>
+            </select></div>
+        </div>
+        <button class="action-btn" onclick="improveScript()">IMPROVE SCRIPT</button>
+        <div id="improveLoader" class="loader">POLISHING...</div>
+        <div class="toolbar">
+            <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('imp')">❌</button>
+            <div class="tool-group">
+                <button class="sm-btn" onclick="clearArea('improveOutput', 'improveInput')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('improveOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('improveOutput')">📋 Copy</button>
+            </div>
+        </div>
+        <div id="improveOutput" class="output-box"></div>
     </div>
 
     <div id="youtube" class="tab-content">
         <div class="input-grid">
             <div class="full-width"><label>Title</label><input type="text" id="ytTopic"></div>
             <div><label>Duration</label><select id="ytDuration"><option>10 Min</option><option>20 Min</option><option>30 Min</option></select></div>
-            <div><label>Category</label><select id="ytCategory"><option>Vlog</option><option>Tech</option><option>Docu</option></select></div>
-            <div><label>Spoken Language</label><input list="languageOptions" id="ytAudioLang"></div>
-            <div><label>Script Format</label><input list="languageOptions" id="ytScriptLang"></div>
+            <div><label>Category</label><select id="ytCategory"><option>Vlog</option><option>Tech</option><option>Docu</option><option>Comedy</option></select></div>
+            <div><label>Language</label><input list="languageOptions" id="ytLanguage"></div>
         </div>
         <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option>🕒 Recent Scripts</option></select>
+            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option>🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
             <div class="tool-group">
                 <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
@@ -345,8 +344,7 @@
         if(key) document.getElementById('apiKey').value = key;
         
         // Defaults
-        document.getElementById('filmAudioLang').value = "Hindi";
-        document.getElementById('filmScriptLang').value = "English";
+        document.getElementById('filmLanguage').value = "English";
     };
 
     function handleLogin() {
@@ -368,15 +366,19 @@
         document.getElementById('login-wrapper').classList.add('hidden');
         document.getElementById('app-main').classList.remove('hidden');
         document.getElementById('welcomeUser').innerText = `User: ${currentUser}`;
+        
         const userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
         if (userData.photo) document.getElementById('userAvatarDisplay').src = userData.photo;
         if (userData.apiKey) document.getElementById('apiKey').value = userData.apiKey;
         
-        ['film', 'dia', 'cine', 'mini', 'yt'].forEach(cat => updateHistoryUI(cat));
+        ['film', 'dia', 'cine', 'imp', 'yt'].forEach(cat => updateHistoryUI(cat));
     }
 
-    function logout() { localStorage.removeItem('nisff_current_user'); location.reload(); }
-    
+    function logout() {
+        localStorage.removeItem('nisff_current_user');
+        location.reload();
+    }
+
     // --- PROFILE ---
     function toggleProfileMenu() {
         const menu = document.getElementById('profile-menu');
@@ -401,7 +403,8 @@
         if (idx !== -1) {
             users[idx].p = newPass;
             localStorage.setItem('nisff_users', JSON.stringify(users));
-            alert("Updated!"); closeModals();
+            alert("Password Updated!");
+            closeModals();
         }
     }
 
@@ -434,7 +437,7 @@
     }
 
     function clearArea(outId, inId) {
-        if(confirm('Clear?')) {
+        if(confirm('Clear contents?')) {
             document.getElementById(outId).innerText = "";
             if(inId) document.getElementById(inId).value = "";
         }
@@ -447,12 +450,18 @@
         win.document.close(); win.print();
     }
 
+    // --- HTML STRIPPER (STRICT) ---
+    function stripHtml(html) {
+        // Removes <center>, <b>, <i> tags completely
+        return html.replace(/<[^>]*>?/gm, '');
+    }
+
     // --- API CALL ---
     async function callGemini(prompt) {
         const key = document.getElementById('apiKey').value;
-        if (!key) { alert("Enter API Key in Profile"); return null; }
+        if (!key) { alert("Please enter API Key in Profile Menu"); return null; }
 
-        // REQUESTED MODEL: gemini-2.5-flash-lite
+        // Using gemini-2.5-flash-lite
         let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         const payload = {
@@ -469,9 +478,8 @@
             let response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             let data = await response.json();
 
-            // FALLBACK TO 1.5 FLASH IF 2.5 FAILS (404 Not Found)
+            // Fallback to 1.5 if 2.5 fails
             if (data.error && (data.error.code === 404 || data.error.message.includes("not found"))) {
-                console.warn("2.5-lite failed, falling back to 1.5-flash");
                 url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
                 response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 data = await response.json();
@@ -480,9 +488,9 @@
             if (data.error) { alert("Error: " + data.error.message); return null; }
             if (!data.candidates) { alert("No content."); return null; }
             
-            return data.candidates[0].content.parts[0].text;
+            return stripHtml(data.candidates[0].content.parts[0].text);
 
-        } catch (e) { alert("Network Error"); return null; }
+        } catch (e) { alert("Error: " + e.message); return null; }
     }
 
     // --- HISTORY ---
@@ -491,7 +499,7 @@
     function addToHistory(category, text) {
         const key = getHistoryKey(category);
         let hist = JSON.parse(localStorage.getItem(key) || '[]');
-        hist.unshift({ time: new Date().toLocaleString(), full: text });
+        hist.unshift({ time: new Date().toLocaleTimeString(), full: text });
         if(hist.length > 10) hist.pop();
         localStorage.setItem(key, JSON.stringify(hist));
         updateHistoryUI(category);
@@ -515,7 +523,7 @@
         if(index === "") return;
         const key = getHistoryKey(category);
         let hist = JSON.parse(localStorage.getItem(key));
-        const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
+        const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'imp': 'improveOutput', 'yt': 'ytOutput' };
         document.getElementById(idMap[category]).innerText = hist[index].full;
     }
 
@@ -528,52 +536,47 @@
             let hist = JSON.parse(localStorage.getItem(key));
             hist.splice(index, 1);
             localStorage.setItem(key, JSON.stringify(hist));
-            const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
+            const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'imp': 'improveOutput', 'yt': 'ytOutput' };
             document.getElementById(idMap[category]).innerText = "";
             updateHistoryUI(category);
         }
     }
 
-    // --- GENERATORS (DUAL LANGUAGE SUPPORT) ---
-    function getPrompt(type, params) {
-        const langInstruction = `
-        STRICT LANGUAGE RULES:
-        1. **Spoken Dialogue/Audio**: MUST be in **${params.audioLang}**.
-        2. **Script Description/Action Lines**: MUST be in **${params.scriptLang}**.
-        Example: If Audio is Hindi and Script is English -> Dialogue: "Kya hua?" | Action: He looks confused.
+    // --- GENERATORS (STRICT LANGUAGE) ---
+    function getStrictInstruction(lang) {
+        if(lang === 'English') return "Write in English.";
+        if(lang === 'Hinglish') return "Write in Hinglish (Hindi words written in English alphabet).";
+        
+        return `
+        STRICT LANGUAGE ENFORCEMENT:
+        1. **Write ONLY in ${lang}**.
+        2. Use the **Native ${lang} Script** (e.g., Assamese script for Assamese, Devanagari for Hindi).
+        3. Do NOT write dialogue in English unless absolutely necessary for a character trait.
+        4. Do NOT verify the language in the output, just write the script.
         `;
-
-        if (type === 'film') {
-            return `Write a Short Film Script. Title: ${params.idea}. Genre: ${params.genre}. Duration: ${params.dur}.
-            ${langInstruction} Format: Standard Screenplay. NO HTML.`;
-        }
-        if (type === 'dia') {
-            return `Write dialogue based on: ${params.ctx}. ${langInstruction} Format: Screenplay Dialogue.`;
-        }
-        if (type === 'cine') {
-            return `Create a Shot List for: ${params.ctx}. Language: ${params.scriptLang}. Format: Shot Type | Description.`;
-        }
-        if (type === 'mini') {
-            return `Write a ${params.dur} Reels Script. Topic: ${params.topic}. Category: ${params.cat}. ${langInstruction}`;
-        }
-        if (type === 'yt') {
-            return `Write a ${params.dur} YouTube Script. Title: ${params.topic}. Category: ${params.cat}. ${langInstruction}`;
-        }
     }
 
     async function generateFilm() {
         const idea = document.getElementById('filmIdea').value;
-        const audioLang = document.getElementById('filmAudioLang').value;
-        const scriptLang = document.getElementById('filmScriptLang').value;
-        
+        const lang = document.getElementById('filmLanguage').value;
+        const genre = document.getElementById('filmGenre').value;
+        const dur = document.getElementById('filmDuration').value;
+
         if(!idea) return alert("Enter Idea");
+        
         document.getElementById('filmLoader').style.display = 'block';
         
-        const prompt = getPrompt('film', { 
-            idea, audioLang, scriptLang, 
-            genre: document.getElementById('filmGenre').value, 
-            dur: document.getElementById('filmDuration').value 
-        });
+        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script.
+        ${getStrictInstruction(lang)}
+        
+        Required Format:
+        TITLE: [Title in ${lang}]
+        LOGLINE: [Logline in ${lang}]
+        SCENE 1: [Header]
+        [Action]
+        [CHARACTER]: [Dialogue]
+        
+        Details: Title: ${idea} | Genre: ${genre} | Duration: ${dur}`;
 
         const script = await callGemini(prompt);
         document.getElementById('filmLoader').style.display = 'none';
@@ -582,82 +585,58 @@
             document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
             
-            // Auto Trigger
-            document.getElementById('diaContext').value = `Script: ${idea}`;
-            document.getElementById('diaAudioLang').value = audioLang;
-            document.getElementById('diaScriptLang').value = scriptLang;
-            
-            document.getElementById('cineContext').value = `Script: ${idea}`;
-            document.getElementById('cineLanguage').value = scriptLang;
-            
-            // Trigger background
-            autoGen(script, audioLang, scriptLang);
+            // Auto Trigger Cinematography
+            document.getElementById('cineContext').value = `Script Title: ${idea}`;
+            document.getElementById('cineLanguage').value = lang;
+            autoGenerateCinematography(idea, genre, lang);
         }
     }
 
-    async function autoGen(script, aLang, sLang) {
-        // Dialogue
-        const diaPrompt = `Extract 3 dialogues from: ${script.substring(0,500)}. Spoken: ${aLang}. Text: ${sLang}.`;
-        const diaRes = await callGemini(diaPrompt);
-        if(diaRes) {
-            document.getElementById('diaOutput').innerText = diaRes;
-            addToHistory('dia', diaRes);
-            document.getElementById('btn-dialogue').classList.add('has-data');
-        }
-        
-        // Cine
-        const cinePrompt = `Create 5 shots for this script. Language: ${sLang}.`;
-        const cineRes = await callGemini(cinePrompt);
-        if(cineRes) {
-            document.getElementById('cineOutput').innerText = cineRes;
-            addToHistory('cine', cineRes);
-            document.getElementById('btn-cinematography').classList.add('has-data');
+    async function autoGenerateCinematography(idea, genre, lang) {
+        const btn = document.getElementById('btn-cinematography');
+        const res = await callGemini(`Create a Shot List for film "${idea}" (${genre}). ${getStrictInstruction(lang)}`);
+        if(res) {
+            document.getElementById('cineOutput').innerText = res;
+            addToHistory('cine', res);
+            btn.classList.add('has-data');
         }
     }
 
+    // Independent Generators
     async function generateDialogue() {
         const ctx = document.getElementById('diaContext').value;
-        const audioLang = document.getElementById('diaAudioLang').value;
-        const scriptLang = document.getElementById('diaScriptLang').value;
+        const lang = document.getElementById('diaAudioLang').value;
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(getPrompt('dia', { ctx, audioLang, scriptLang }));
+        const res = await callGemini(`Write movie dialogues for: ${ctx}. ${getStrictInstruction(lang)}`);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
     }
 
     async function generateCinematography() {
         const ctx = document.getElementById('cineContext').value;
-        const scriptLang = document.getElementById('cineLanguage').value;
+        const lang = document.getElementById('cineLanguage').value;
         document.getElementById('cineLoader').style.display = 'block';
-        const res = await callGemini(getPrompt('cine', { ctx, scriptLang }));
+        const res = await callGemini(`Create Shot List for: ${ctx}. ${getStrictInstruction(lang)}`);
         document.getElementById('cineLoader').style.display = 'none';
         if(res) { document.getElementById('cineOutput').innerText = res; addToHistory('cine', res); }
     }
 
-    async function generateMini() {
-        const topic = document.getElementById('miniTopic').value;
-        const audioLang = document.getElementById('miniAudioLang').value;
-        const scriptLang = document.getElementById('miniScriptLang').value;
-        document.getElementById('miniLoader').style.display = 'block';
-        const res = await callGemini(getPrompt('mini', { 
-            topic, audioLang, scriptLang, 
-            dur: document.getElementById('miniDuration').value, 
-            cat: document.getElementById('miniCategory').value 
-        }));
-        document.getElementById('miniLoader').style.display = 'none';
-        if(res) { document.getElementById('miniOutput').innerText = res; addToHistory('mini', res); }
+    async function improveScript() {
+        const input = document.getElementById('improveInput').value;
+        const type = document.getElementById('improveType').value;
+        if(!input) return alert("Paste script first");
+        
+        document.getElementById('improveLoader').style.display = 'block';
+        const res = await callGemini(`Improve this script based on: ${type}. Keep the original language. \n\nScript: ${input}`);
+        document.getElementById('improveLoader').style.display = 'none';
+        if(res) { document.getElementById('improveOutput').innerText = res; addToHistory('imp', res); }
     }
 
     async function generateYouTube() {
         const topic = document.getElementById('ytTopic').value;
-        const audioLang = document.getElementById('ytAudioLang').value;
-        const scriptLang = document.getElementById('ytScriptLang').value;
+        const lang = document.getElementById('ytLanguage').value;
         document.getElementById('ytLoader').style.display = 'block';
-        const res = await callGemini(getPrompt('yt', { 
-            topic, audioLang, scriptLang, 
-            dur: document.getElementById('ytDuration').value, 
-            cat: document.getElementById('ytCategory').value 
-        }));
+        const res = await callGemini(`Write YouTube script about: ${topic}. ${getStrictInstruction(lang)}`);
         document.getElementById('ytLoader').style.display = 'none';
         if(res) { document.getElementById('ytOutput').innerText = res; addToHistory('yt', res); }
     }
