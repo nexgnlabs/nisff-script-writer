@@ -120,14 +120,17 @@
         /* Inputs */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .full-width { grid-column: span 3; }
-        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
         input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
 
-        .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; margin-top: 10px; transition: 0.2s; }
+        /* Buttons & Limits */
+        .action-container { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .action-btn { flex: 1; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; transition: 0.2s; }
         .action-btn:hover { filter: brightness(1.1); }
+        .limit-badge { color: #888; font-size: 12px; font-weight: bold; white-space: nowrap; background: #111; padding: 5px 10px; border-radius: 4px; border: 1px solid #333; }
 
-        /* TOOLBAR (NON-STATIC) */
+        /* Toolbar */
         .toolbar { 
             display: flex; justify-content: flex-end; align-items: center; 
             margin-top: 15px; margin-bottom: 5px; gap: 8px; 
@@ -175,7 +178,6 @@
 
         <div class="user-controls">
             <img id="userAvatarDisplay" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="user-avatar" onclick="toggleProfileMenu()">
-            
             <div id="profile-menu">
                 <h4>Profile & Settings</h4>
                 <div class="key-section">
@@ -234,9 +236,11 @@
             <div><label>Duration</label><select id="filmDuration"><option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option><option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option><option>40 Minutes</option></select></div>
             <div><label>Language</label><input list="languageOptions" id="filmLanguage" placeholder="Select Language"></div>
         </div>
-        <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + AUTO CINEMATOGRAPHY</button>
+        <div class="action-container">
+            <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + AUTO CINEMATOGRAPHY</button>
+            <span class="limit-badge" id="limit-film">Checking...</span>
+        </div>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
-        
         <div class="toolbar">
             <select id="hist-film" class="history-select" onchange="restoreHistory('film')"><option value="">🕒 Recent Scripts</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('film')">❌</button>
@@ -252,11 +256,13 @@
             <div class="full-width"><label>Script Context</label><textarea id="cineContext" rows="3"></textarea></div>
             <div><label>Language</label><input list="languageOptions" id="cineLanguage"></div>
         </div>
-        <button class="action-btn" onclick="generateCinematography()">GENERATE SHOT LIST</button>
+        <div class="action-container">
+            <button class="action-btn" onclick="generateCinematography()">GENERATE SHOT LIST</button>
+            <span class="limit-badge" id="limit-cine">Checking...</span>
+        </div>
         <div id="cineLoader" class="loader">PLANNING SHOTS...</div>
-        
         <div class="toolbar">
-            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent</option></select>
+            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent Scripts</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('cine')">❌</button>
             <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
@@ -270,10 +276,13 @@
             <div class="full-width"><label>Context</label><textarea id="diaContext" rows="3" placeholder="Context..."></textarea></div>
             <div><label>Language</label><input list="languageOptions" id="diaLanguage" placeholder="Select Language"></div>
         </div>
-        <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
+        <div class="action-container">
+            <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
+            <span class="limit-badge" id="limit-dia">Checking...</span>
+        </div>
         <div id="diaLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent</option></select>
+            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent Scripts</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
             <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
@@ -293,10 +302,13 @@
             </select></div>
             <div><label>Target Language</label><input list="languageOptions" id="improveLang" placeholder="Select"></div>
         </div>
-        <button class="action-btn" onclick="improveScript()">IMPROVE & TRANSLATE</button>
+        <div class="action-container">
+            <button class="action-btn" onclick="improveScript()">IMPROVE & TRANSLATE</button>
+            <span class="limit-badge" id="limit-imp">Checking...</span>
+        </div>
         <div id="improveLoader" class="loader">POLISHING...</div>
         <div class="toolbar">
-            <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent</option></select>
+            <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent Scripts</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('imp')">❌</button>
             <button class="sm-btn" onclick="clearArea('improveOutput', 'improveInput')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('improveOutput')">🖨️ Print</button>
@@ -318,10 +330,13 @@
             </select></div>
             <div><label>Language</label><input list="languageOptions" id="ytLanguage"></div>
         </div>
-        <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
+        <div class="action-container">
+            <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
+            <span class="limit-badge" id="limit-yt">Checking...</span>
+        </div>
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option value="">🕒 Recent</option></select>
+            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option value="">🕒 Recent Scripts</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
             <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
@@ -352,8 +367,9 @@
 
 <script>
     let currentUser = null;
+    const LIMITS = { film: 3, cine: 3, dia: 10, imp: 5, yt: 3 };
 
-    // --- 50+ TESTIMONIALS ---
+    // --- TESTIMONIALS (50+) ---
     const testimonials = [
         "NEXGN Script Writer changed my filmmaking career! - Rohan K.",
         "Best AI tool for dialogue writing. Highly recommended. - Priya S.",
@@ -387,7 +403,7 @@
         "Works great on my iPad too. - MobileUser",
         "Punjabi scripts are fantastic! - SinghIsKing",
         "The duration estimator is quite accurate. - TimeKeeper",
-        "Love the new V17 update! - EarlyAdopter",
+        "Love the new V18 update! - EarlyAdopter",
         "Makes pre-production so much smoother. - Producer Pam",
         "The drone shot suggestions are epic. - SkyHigh",
         "Urdu poetry scripts come out beautiful. - PoetSoul",
@@ -420,7 +436,6 @@
         document.getElementById('filmLanguage').value = "English";
         document.getElementById('diaLanguage').value = "English";
         document.getElementById('cineLanguage').value = "English";
-        document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
         document.getElementById('improveLang').value = "English";
 
@@ -432,11 +447,11 @@
         setInterval(() => {
             const el = document.getElementById('testimonialText');
             el.style.animation = 'none';
-            el.offsetHeight; /* trigger reflow */
+            el.offsetHeight; 
             el.style.animation = 'fade 10s infinite';
             el.innerText = testimonials[i];
             i = (i + 1) % testimonials.length;
-        }, 10000); // 10 Seconds
+        }, 10000);
     }
 
     function handleLogin() {
@@ -461,7 +476,10 @@
         const userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
         if (userData.photo) document.getElementById('userAvatarDisplay').src = userData.photo;
         
-        ['film', 'dia', 'cine', 'imp', 'yt'].forEach(cat => updateHistoryUI(cat));
+        ['film', 'dia', 'cine', 'imp', 'yt'].forEach(cat => {
+            updateHistoryUI(cat);
+            updateLimitUI(cat); // Check limits on load
+        });
     }
 
     function logout() {
@@ -483,6 +501,7 @@
 
     function saveNewPassword() {
         const newPass = document.getElementById('newPassInput').value;
+        if (!newPass) return alert("Enter password");
         let users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         const idx = users.findIndex(u => u.u === currentUser);
         if (idx !== -1) {
@@ -537,6 +556,48 @@
         return html.replace(/<[^>]*>?/gm, ''); 
     }
 
+    // --- USAGE LIMITS ---
+    function getUsageKey() {
+        const date = new Date().toISOString().split('T')[0];
+        return `nisff_usage_${currentUser}_${date}`;
+    }
+
+    function getUsage() {
+        const key = getUsageKey();
+        return JSON.parse(localStorage.getItem(key) || '{}');
+    }
+
+    function checkLimit(type) {
+        if(!currentUser) return false;
+        const usage = getUsage();
+        const current = usage[type] || 0;
+        if(current >= LIMITS[type]) {
+            alert(`Daily limit reached for ${type}. Limit: ${LIMITS[type]}`);
+            return false;
+        }
+        return true;
+    }
+
+    function incrementUsage(type) {
+        const key = getUsageKey();
+        const usage = getUsage();
+        usage[type] = (usage[type] || 0) + 1;
+        localStorage.setItem(key, JSON.stringify(usage));
+        updateLimitUI(type);
+    }
+
+    function updateLimitUI(type) {
+        if(!currentUser) return;
+        const usage = getUsage();
+        const left = LIMITS[type] - (usage[type] || 0);
+        const el = document.getElementById(`limit-${type}`);
+        if(el) {
+            el.innerText = `(${left}/${LIMITS[type]} Left)`;
+            el.style.color = left === 0 ? 'var(--error)' : 'var(--text)';
+        }
+    }
+
+    // --- API CALL ---
     async function callGemini(prompt) {
         const key = document.getElementById('apiKey').value;
         if (!key) { alert("Please enter API Key in Profile Menu"); return null; }
@@ -573,10 +634,10 @@
     }
 
     // --- HISTORY ---
-    function getHistoryKey(category) { return `nisff_hist_${currentUser}_${category}`; }
+    function getHistoryKeyName(category) { return `nisff_hist_${currentUser}_${category}`; }
     
     function addToHistory(category, text) {
-        const key = getHistoryKey(category);
+        const key = getHistoryKeyName(category);
         let hist = JSON.parse(localStorage.getItem(key) || '[]');
         hist.unshift({ time: new Date().toLocaleTimeString(), full: text });
         if(hist.length > 10) hist.pop();
@@ -585,7 +646,7 @@
     }
 
     function updateHistoryUI(category) {
-        const key = getHistoryKey(category);
+        const key = getHistoryKeyName(category);
         let hist = JSON.parse(localStorage.getItem(key) || '[]');
         const select = document.getElementById(`hist-${category}`);
         while (select.options.length > 1) { select.remove(1); }
@@ -600,7 +661,7 @@
         const select = document.getElementById(`hist-${category}`);
         const index = select.value;
         if(index === "") return;
-        const key = getHistoryKey(category);
+        const key = getHistoryKeyName(category);
         let hist = JSON.parse(localStorage.getItem(key));
         const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'imp': 'improveOutput', 'yt': 'ytOutput' };
         document.getElementById(idMap[category]).innerText = hist[index].full;
@@ -611,7 +672,7 @@
         const index = select.value;
         if(index === "") return;
         if(confirm("Delete item?")) {
-            const key = getHistoryKey(category);
+            const key = getHistoryKeyName(category);
             let hist = JSON.parse(localStorage.getItem(key));
             hist.splice(index, 1);
             localStorage.setItem(key, JSON.stringify(hist));
@@ -621,6 +682,7 @@
         }
     }
 
+    // --- GENERATORS ---
     function getStrictInstruction(lang) {
         if(lang === 'English') return "Write entirely in English.";
         if(lang === 'Hinglish') return "Write in Hinglish (Hindi words written in English alphabet).";
@@ -628,6 +690,7 @@
     }
 
     async function generateFilm() {
+        if(!checkLimit('film')) return;
         const idea = document.getElementById('filmIdea').value;
         const lang = document.getElementById('filmLanguage').value;
         const genre = document.getElementById('filmGenre').value;
@@ -645,11 +708,11 @@
         document.getElementById('filmLoader').style.display = 'none';
         
         if(script) {
+            incrementUsage('film');
             document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
             
-            document.getElementById('diaContext').value = `Script: ${idea}`;
-            document.getElementById('diaLanguage').value = lang;
+            // Auto Trigger Setup
             document.getElementById('cineContext').value = `Script: ${idea}`;
             document.getElementById('cineLanguage').value = lang;
             
@@ -658,6 +721,7 @@
     }
 
     async function autoGenerateCinematography(idea, genre, lang) {
+        // DOES NOT CHECK LIMIT (Free with script)
         const btn = document.getElementById('btn-cinematography');
         const res = await callGemini(`Create a Shot List for film "${idea}" (${genre}). ${getStrictInstruction(lang)}`);
         if(res) {
@@ -668,41 +732,61 @@
     }
 
     async function generateDialogue() {
+        if(!checkLimit('dia')) return;
         const ctx = document.getElementById('diaContext').value;
         const lang = document.getElementById('diaLanguage').value;
         document.getElementById('diaLoader').style.display = 'block';
         const res = await callGemini(`Write movie dialogues for: ${ctx}. ${getStrictInstruction(lang)}`);
         document.getElementById('diaLoader').style.display = 'none';
-        if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
+        if(res) { 
+            incrementUsage('dia');
+            document.getElementById('diaOutput').innerText = res; 
+            addToHistory('dia', res); 
+        }
     }
 
     async function generateCinematography() {
+        if(!checkLimit('cine')) return;
         const ctx = document.getElementById('cineContext').value;
         const lang = document.getElementById('cineLanguage').value;
         document.getElementById('cineLoader').style.display = 'block';
         const res = await callGemini(`Create Shot List for: ${ctx}. ${getStrictInstruction(lang)}`);
         document.getElementById('cineLoader').style.display = 'none';
-        if(res) { document.getElementById('cineOutput').innerText = res; addToHistory('cine', res); }
+        if(res) { 
+            incrementUsage('cine');
+            document.getElementById('cineOutput').innerText = res; 
+            addToHistory('cine', res); 
+        }
     }
 
     async function improveScript() {
+        if(!checkLimit('imp')) return;
         const input = document.getElementById('improveInput').value;
         const type = document.getElementById('improveType').value;
         const lang = document.getElementById('improveLang').value;
         if(!input) return alert("Paste script first");
         document.getElementById('improveLoader').style.display = 'block';
-        const res = await callGemini(`Improve this script: ${type}. Rewrite in **${lang}** (Native Script). \n\n${input}`);
+        const res = await callGemini(`Improve this script based on: ${type}. Rewrite in **${lang}** (Native Script). \n\n${input}`);
         document.getElementById('improveLoader').style.display = 'none';
-        if(res) { document.getElementById('improveOutput').innerText = res; addToHistory('imp', res); }
+        if(res) { 
+            incrementUsage('imp');
+            document.getElementById('improveOutput').innerText = res; 
+            addToHistory('imp', res); 
+        }
     }
 
     async function generateYouTube() {
+        if(!checkLimit('yt')) return;
         const topic = document.getElementById('ytTopic').value;
         const lang = document.getElementById('ytLanguage').value;
         document.getElementById('ytLoader').style.display = 'block';
         const res = await callGemini(`Write YouTube script about: ${topic}. ${getStrictInstruction(lang)}`);
         document.getElementById('ytLoader').style.display = 'none';
-        if(res) { document.getElementById('ytOutput').innerText = res; addToHistory('yt', res); }
+        if(res) { 
+            incrementUsage('yt');
+            document.getElementById('ytOutput').innerText = res; 
+            addToHistory('yt', res); 
+        }
     }
 
 </script>
