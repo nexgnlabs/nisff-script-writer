@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v11.1</title>
+    <title>NISFF Script Writer Pro v12.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -35,7 +35,7 @@
         /* Login Screen */
         #login-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #222 0%, #000 70%); z-index: 1000;
+            background: radial-gradient(circle at center, #222 0%, #000 70%); z-index: 9999;
             display: flex; align-items: center; justify-content: center;
         }
         .login-box {
@@ -48,7 +48,12 @@
         .login-btn:hover { background: #fff; }
 
         /* Dashboard */
-        .app-shell { max-width: 1200px; margin: 20px auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; height: 90vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .app-shell { 
+            max-width: 1200px; margin: 20px auto; background: var(--card); 
+            border: 1px solid var(--border); border-radius: 12px; padding: 20px; 
+            height: 90vh; display: flex; flex-direction: column; position: relative; 
+            /* REMOVED OVERFLOW HIDDEN HERE TO ALLOW MENU POPUP */
+        }
         
         /* NEXGN Watermark */
         .nexgn-watermark {
@@ -60,17 +65,18 @@
             letter-spacing: 10px; user-select: none;
         }
 
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px; z-index: 1; position: relative; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px; z-index: 2; position: relative; }
         h1 { margin: 0; font-size: 22px; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; }
         
         .user-controls { display: flex; align-items: center; gap: 15px; position: relative; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer; }
         
-        /* Profile Menu */
+        /* Profile Menu - FIXED Z-INDEX */
         #profile-menu {
             position: absolute; top: 60px; right: 0; background: #1a1a1a;
             border: 1px solid var(--primary); border-radius: 8px; width: 250px;
-            padding: 15px; display: none; z-index: 2000; box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            padding: 15px; display: none; z-index: 9999; /* Highest Priority */
+            box-shadow: 0 5px 20px rgba(0,0,0,0.9);
         }
         #profile-menu h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         #profile-menu button { width: 100%; padding: 10px; text-align: left; background: transparent; border: none; color: #fff; border-bottom: 1px solid #333; cursor: pointer; }
@@ -84,6 +90,7 @@
         .tab-btn.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
         .tab-btn:hover { background: #222; color: #fff; }
 
+        /* Content Area - Added Overflow here */
         .tab-content { display: none; padding: 10px; flex-grow: 1; overflow-y: auto; z-index: 1; position: relative; }
         .tab-content.active { display: block; }
 
@@ -96,15 +103,18 @@
         .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; margin-top: 10px; }
         
         /* Output & Tools */
-        .toolbar { display: flex; justify-content: flex-end; margin-top: 10px; gap: 10px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 5px 0; border-bottom: 1px solid #222; }
+        .tool-group { display: flex; gap: 10px; }
+        .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 200px; }
         .sm-btn { background: #333; color: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #555; font-size: 12px; }
-        
+        .del-btn { background: #b00020; border-color: #790000; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
         .output-box { background: #000; border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-top: 5px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; color: #ccc; font-size: 15px; line-height: 1.6; }
         .loader { display: none; text-align: center; color: var(--primary); margin-top: 10px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
         /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: none; align-items: center; justify-content: center; }
         .modal-box { background: #1a1a1a; padding: 30px; border-radius: 10px; width: 300px; text-align: center; border: 1px solid var(--primary); }
     </style>
 </head>
@@ -112,7 +122,7 @@
 
 <div id="login-wrapper">
     <div class="login-box">
-        <h2>NISFF SCRIPT WRITER PRO v11.0 <span class="reel-icon">🎞️</span></h2>
+        <h2>NISFF SCRIPT WRITER PRO v12.0 <span class="reel-icon">🎞️</span></h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
@@ -207,9 +217,13 @@
         <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUES + CINEMATOGRAPHY</button>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         <div class="toolbar">
-            <button class="sm-btn" onclick="clearArea('filmOutput', 'filmIdea')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
+            <select id="hist-film" class="history-select" onchange="restoreHistory('film')"><option value="">🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('film')">❌</button>
+            <div class="tool-group">
+                <button class="sm-btn" onclick="clearArea('filmOutput', 'filmIdea')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
+            </div>
         </div>
         <div id="filmOutput" class="output-box"></div>
     </div>
@@ -228,9 +242,13 @@
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
         <div id="diaLoader" class="loader">WRITING DIALOGUES...</div>
         <div class="toolbar">
-            <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
+            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
+            <div class="tool-group">
+                <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
+            </div>
         </div>
         <div id="diaOutput" class="output-box"></div>
     </div>
@@ -249,9 +267,13 @@
         <button class="action-btn" onclick="generateCinematography()">GENERATE CAMERA & DRONE ANGLES</button>
         <div id="cineLoader" class="loader">PLANNING SHOTS...</div>
         <div class="toolbar">
-            <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('cineOutput')">📋 Copy</button>
+            <select id="hist-camera" class="history-select" onchange="restoreHistory('camera')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('camera')">❌</button>
+            <div class="tool-group">
+                <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('cineOutput')">📋 Copy</button>
+            </div>
         </div>
         <div id="cineOutput" class="output-box"></div>
     </div>
@@ -285,9 +307,13 @@
         <button class="action-btn" onclick="generateMini()">GENERATE REEL SCRIPT</button>
         <div id="miniLoader" class="loader">CREATING...</div>
         <div class="toolbar">
-            <button class="sm-btn" onclick="clearArea('miniOutput', 'miniTopic')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('miniOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('miniOutput')">📋 Copy</button>
+            <select id="hist-mini" class="history-select" onchange="restoreHistory('mini')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('mini')">❌</button>
+            <div class="tool-group">
+                <button class="sm-btn" onclick="clearArea('miniOutput', 'miniTopic')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('miniOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('miniOutput')">📋 Copy</button>
+            </div>
         </div>
         <div id="miniOutput" class="output-box"></div>
     </div>
@@ -321,9 +347,13 @@
         <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('ytOutput')">📋 Copy</button>
+            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option>🕒 History</option></select>
+            <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
+            <div class="tool-group">
+                <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
+                <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('ytOutput')">📋 Copy</button>
+            </div>
         </div>
         <div id="ytOutput" class="output-box"></div>
     </div>
@@ -351,7 +381,6 @@
 <script>
     let currentUser = null;
 
-    // --- AUTH ---
     window.onload = () => {
         const sessionUser = localStorage.getItem('nisff_current_user');
         if (sessionUser) {
@@ -387,10 +416,11 @@
         document.getElementById('app-main').classList.remove('hidden');
         document.getElementById('welcomeUser').innerText = `Welcome, ${currentUser}`;
         
-        // Load settings
         const userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
         if (userData.photo) document.getElementById('userAvatarDisplay').src = userData.photo;
         if (userData.apiKey) document.getElementById('apiKey').value = userData.apiKey;
+
+        ['film', 'dia', 'camera', 'mini', 'yt'].forEach(cat => updateHistoryUI(cat));
     }
 
     function logout() {
@@ -398,7 +428,6 @@
         location.reload();
     }
 
-    // --- PROFILE ---
     function toggleProfileMenu() {
         const menu = document.getElementById('profile-menu');
         menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
@@ -443,17 +472,15 @@
         reader.readAsDataURL(file);
     }
 
-    // --- TABS & UI ---
     function openTab(id) {
         document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        // Add active class to button logic if needed
         const btns = document.querySelectorAll('.tab-btn');
         btns.forEach(btn => {
             if(btn.onclick.toString().includes(id)) {
                 btn.classList.add('active');
-                btn.classList.remove('has-data'); // Clear notification
+                btn.classList.remove('has-data');
             }
         });
     }
@@ -473,34 +500,36 @@
         win.document.close(); win.print();
     }
 
-    // --- HTML STRIPPER ---
-    function stripHtml(html) {
-        let tmp = document.createElement("DIV");
-        tmp.innerHTML = html;
-        return tmp.textContent || tmp.innerText || "";
-    }
-
-    // --- API CALL ---
+    // --- API & GENERATION ---
     async function callGemini(prompt) {
         const key = document.getElementById('apiKey').value;
         if (!key) { alert("Please enter API Key in Profile Menu"); return null; }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
 
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
+                    contents: [{ parts: [{ text: prompt }] }],
+                    // Relaxed safety settings to allow creative freedom
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                    ]
                 })
             });
+
             const data = await response.json();
             if (data.error) { alert(data.error.message); return null; }
             if (!data.candidates) { alert("No content generated."); return null; }
             
-            // STRICT CLEANING
-            return stripHtml(data.candidates[0].content.parts[0].text);
+            // Clean Markdown bolding from headers to keep it raw text
+            let text = data.candidates[0].content.parts[0].text;
+            return text.replace(/\*\*/g, "").replace(/\*/g, ""); 
 
         } catch (e) {
             alert("Error: " + e.message);
@@ -508,7 +537,7 @@
         }
     }
 
-    // --- GENERATORS ---
+    // --- PROMPTS ---
     async function generateFilm() {
         const idea = document.getElementById('filmIdea').value;
         const lang = document.getElementById('filmLanguage').value;
@@ -519,36 +548,32 @@
         
         document.getElementById('filmLoader').style.display = 'block';
         
-        // REINFORCED PROMPT FOR STRICT LANGUAGE & FORMAT
+        // STRICT LANGUAGE PROMPT
         const prompt = `Act as a Professional Screenwriter.
         Task: Write a complete Short Film Script.
         
         CRITICAL RULES:
         1. **STRICTLY USE ${lang} LANGUAGE**. 
-        2. The Title, Logline, Action Lines, and Dialogue MUST represent the ${lang} language naturally (use Native Script e.g., Devanagari/Bengali script).
-        3. Do NOT include any HTML tags like <center>. Use purely text-based formatting.
+        2. The Title, Logline, Action Lines, and Dialogue MUST be in **${lang}** (use Native Script e.g., Devanagari for Hindi).
+        3. Do NOT include any HTML tags.
         4. Do NOT translate back to English.
         
         REQUIRED FORMAT:
         TITLE: [Title in ${lang}]
         LOGLINE: [Logline in ${lang}]
+        -----------------------------------
+        [Standard Screenplay Format in ${lang}]
         
-        SCENE 1
-        [Scene Heading]
-        [Action]
-        [CHARACTER NAME]: [Dialogue]
-        
-        Story Idea: ${idea}
-        Genre: ${genre}
-        Duration: ${dur}`;
+        Story Idea: ${idea} | Genre: ${genre} | Duration: ${dur}`;
 
         const script = await callGemini(prompt);
         document.getElementById('filmLoader').style.display = 'none';
         
         if(script) {
             document.getElementById('filmOutput').innerText = script;
+            addToHistory('film', script);
             
-            // Auto Trigger other tabs
+            // Auto Trigger
             document.getElementById('diaContext').value = `Script: ${idea}`;
             document.getElementById('diaLanguage').value = lang;
             document.getElementById('cineContext').value = `Script: ${idea}`;
@@ -561,29 +586,32 @@
 
     async function autoGenerateDialogue(script, lang) {
         const btn = document.getElementById('btn-dialogue');
-        const res = await callGemini(`Extract dialogue from this script: ${script.substring(0,1000)}. Language: **${lang}**. Plain Text.`);
+        const res = await callGemini(`Extract dialogue from this script: ${script.substring(0,1000)}. Language: **${lang}** (Native Script). Plain Text.`);
         if(res) {
             document.getElementById('diaOutput').innerText = res;
+            addToHistory('dia', res);
             btn.classList.add('has-data');
         }
     }
 
     async function autoGenerateCinematography(idea, genre, lang) {
         const btn = document.getElementById('btn-cinematography');
-        const res = await callGemini(`Create a Cinematography/Shot List for film "${idea}" (${genre}). Language: **${lang}**. Plain Text.`);
+        const res = await callGemini(`Create a Cinematography/Shot List for film "${idea}" (${genre}). Language: **${lang}** (Native Script). Plain Text.`);
         if(res) {
             document.getElementById('cineOutput').innerText = res;
+            addToHistory('camera', res);
             btn.classList.add('has-data');
         }
     }
 
+    // Manual Generators
     async function generateDialogue() {
         const ctx = document.getElementById('diaContext').value;
         const lang = document.getElementById('diaLanguage').value;
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write dialogues for: ${ctx}. Language: **${lang}**. Plain Text. NO HTML.`);
+        const res = await callGemini(`Write dialogues for: ${ctx}. Language: **${lang}**. Plain Text.`);
         document.getElementById('diaLoader').style.display = 'none';
-        if(res) document.getElementById('diaOutput').innerText = res;
+        if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
     }
 
     async function generateCinematography() {
@@ -592,7 +620,7 @@
         document.getElementById('cineLoader').style.display = 'block';
         const res = await callGemini(`Create Shot List/Cinematography for: ${ctx}. Language: **${lang}**. Plain Text.`);
         document.getElementById('cineLoader').style.display = 'none';
-        if(res) document.getElementById('cineOutput').innerText = res;
+        if(res) { document.getElementById('cineOutput').innerText = res; addToHistory('camera', res); }
     }
 
     async function generateMini() {
@@ -601,7 +629,7 @@
         document.getElementById('miniLoader').style.display = 'block';
         const res = await callGemini(`Write Reels script about: ${topic}. Language: **${lang}**. Plain Text.`);
         document.getElementById('miniLoader').style.display = 'none';
-        if(res) document.getElementById('miniOutput').innerText = res;
+        if(res) { document.getElementById('miniOutput').innerText = res; addToHistory('mini', res); }
     }
 
     async function generateYouTube() {
@@ -610,7 +638,61 @@
         document.getElementById('ytLoader').style.display = 'block';
         const res = await callGemini(`Write YouTube script about: ${topic}. Language: **${lang}**. Plain Text.`);
         document.getElementById('ytLoader').style.display = 'none';
-        if(res) document.getElementById('ytOutput').innerText = res;
+        if(res) { document.getElementById('ytOutput').innerText = res; addToHistory('yt', res); }
+    }
+
+    // --- HISTORY ---
+    function getHistoryKey(category) {
+        return `nisff_hist_${currentUser}_${category}`;
+    }
+
+    function addToHistory(category, text) {
+        const key = getHistoryKey(category);
+        let hist = JSON.parse(localStorage.getItem(key) || '[]');
+        hist.unshift({ time: new Date().toLocaleString(), full: text });
+        if(hist.length > 10) hist.pop();
+        localStorage.setItem(key, JSON.stringify(hist));
+        updateHistoryUI(category);
+    }
+
+    function updateHistoryUI(category) {
+        const key = getHistoryKey(category);
+        let hist = JSON.parse(localStorage.getItem(key) || '[]');
+        const select = document.getElementById(`hist-${category}`);
+        // Keep only first option
+        while (select.options.length > 1) { select.remove(1); }
+        
+        hist.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index; 
+            opt.text = item.time;
+            select.appendChild(opt);
+        });
+    }
+
+    function restoreHistory(category) {
+        const select = document.getElementById(`hist-${category}`);
+        const index = select.value;
+        if(index === "") return;
+        const key = getHistoryKey(category);
+        let hist = JSON.parse(localStorage.getItem(key));
+        const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'camera': 'cineOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
+        document.getElementById(idMap[category]).innerText = hist[index].full;
+    }
+
+    function deleteHistoryItem(category) {
+        const select = document.getElementById(`hist-${category}`);
+        const index = select.value;
+        if(index === "") return;
+        if(confirm("Delete this history item?")) {
+            const key = getHistoryKey(category);
+            let hist = JSON.parse(localStorage.getItem(key));
+            hist.splice(index, 1);
+            localStorage.setItem(key, JSON.stringify(hist));
+            const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'camera': 'cineOutput', 'mini': 'miniOutput', 'yt': 'ytOutput' };
+            document.getElementById(idMap[category]).innerText = "";
+            updateHistoryUI(category);
+        }
     }
 
 </script>
