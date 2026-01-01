@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v6.2</title>
+    <title>NISFF Script Writer Pro v6.4</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -285,7 +285,14 @@
             <div>
                 <label>Category</label>
                 <select id="miniCategory">
-                    <option>Comedy</option><option>Horror</option><option>Drama</option><option>Educational</option><option>Vlog</option><option>Tech</option>
+                    <option>Comedy</option><option>Horror</option><option>Drama</option>
+                    <option>Educational</option><option>Vlog</option><option>Tech</option>
+                    <option>Animation</option><option>Action</option><option>Thriller</option>
+                    <option>Dance / Music</option><option>DIY / Crafts</option><option>Fashion / Beauty</option>
+                    <option>Fitness / Health</option><option>Travel</option><option>Food / Cooking</option>
+                    <option>Life Hacks</option><option>Behind the Scenes</option><option>Challenges</option>
+                    <option>Motivational</option><option>Gaming</option>
+                    <option>True Crime</option><option>Finance</option>
                 </select>
             </div>
             <div>
@@ -315,13 +322,21 @@
             <div>
                 <label>Duration</label>
                 <select id="ytDuration">
-                    <option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option>
-                    <option>25 Minutes</option><option>30 Minutes</option>
+                    <option>10 Minutes</option><option>15 Minutes</option>
+                    <option>20 Minutes</option><option>25 Minutes</option>
+                    <option>30 Minutes</option>
                 </select>
             </div>
             <div>
                 <label>Category</label>
-                <select id="ytCategory"><option>Comedy</option><option>Tech</option><option>Vlog</option><option>Docu</option><option>Horror</option></select>
+                <select id="ytCategory">
+                    <option>Comedy</option><option>Tech</option><option>Vlog</option><option>Docu</option>
+                    <option>Horror</option><option>Gaming</option><option>Education</option><option>Review</option>
+                    <option>Animation</option><option>Action</option><option>True Crime</option><option>ASMR</option>
+                    <option>Lifestyle</option><option>Commentary</option><option>Music Video</option><option>Short Film</option>
+                    <option>Podcast</option><option>Unboxing</option><option>Science / Experiments</option>
+                    <option>History</option><option>Finance / Business</option><option>Self-Improvement</option>
+                </select>
             </div>
             <div>
                 <label>Language</label>
@@ -349,21 +364,32 @@
     const MASTER_PASS = "IMlegend255@";
 
     window.onload = () => {
+        // 1. Check for Active Login Session
+        const session = localStorage.getItem('nisff_session');
+        if (session === 'active') {
+            document.getElementById('login-wrapper').classList.add('hidden');
+            document.getElementById('app-main').classList.remove('hidden');
+        }
+
+        // 2. Initialize Admin
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         if (users.length === 0) {
             users.push({ u: MASTER_USER, p: MASTER_PASS, role: 'admin' });
             localStorage.setItem('nisff_users', JSON.stringify(users));
         }
 
+        // 3. Load Key & Defaults
         const key = localStorage.getItem('nisff_key');
         if (key) document.getElementById('apiKey').value = key;
         
-        // Setup defaults
         document.getElementById('filmLanguage').value = "English";
         document.getElementById('diaLanguage').value = "English";
         document.getElementById('cameraLanguage').value = "English";
         document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
+
+        // 4. LOAD HISTORY ON REFRESH
+        ['film', 'dia', 'camera', 'mini', 'yt'].forEach(cat => updateHistoryUI(cat));
     };
 
     function handleLogin() {
@@ -374,6 +400,7 @@
         const valid = users.find(user => user.u === u && user.p === p);
 
         if (valid) {
+            localStorage.setItem('nisff_session', 'active'); // Save login
             document.getElementById('login-wrapper').classList.add('hidden');
             document.getElementById('app-main').classList.remove('hidden');
         } else {
@@ -381,8 +408,12 @@
         }
     }
 
-    function logout() { location.reload(); }
+    function logout() { 
+        localStorage.removeItem('nisff_session'); // Clear session
+        location.reload(); 
+    }
 
+    // --- ADMIN PANEL ---
     function toggleAdminPanel() {
         const panel = document.getElementById('admin-panel');
         if (panel.style.display === 'none' || panel.style.display === '') {
@@ -458,7 +489,6 @@
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
 
-        // Using Gemini 2.5 Flash Lite
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         try {
@@ -477,7 +507,6 @@
             });
 
             const data = await response.json();
-            
             if (data.error) {
                 alert("API Error: " + data.error.message);
                 return null;
@@ -547,7 +576,6 @@
         if(script) {
             document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
-            // Autofill
             document.getElementById('diaContext').value = `Script: ${idea}`;
             document.getElementById('diaLanguage').value = lang;
             document.getElementById('cameraContext').value = `Script: ${idea}`;
