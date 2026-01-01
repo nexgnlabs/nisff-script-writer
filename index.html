@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXGN Script Writer Pro v14.0</title>
+    <title>NEXGN Script Writer Pro v15.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Gold */
@@ -22,6 +22,8 @@
         /* Animations */
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .reel-icon { display: inline-block; font-size: 24px; margin-left: 10px; animation: spin 4s linear infinite; vertical-align: middle; }
+        
+        @keyframes fade { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
         
         /* Blinking Indicator */
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
@@ -70,7 +72,7 @@
         #profile-menu {
             position: absolute; top: 60px; right: 0; background: #1a1a1a;
             border: 1px solid var(--primary); border-radius: 8px; width: 250px;
-            padding: 15px; display: none; z-index: 9999; 
+            padding: 15px; display: none; z-index: 2000; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.9);
         }
         #profile-menu h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
@@ -92,13 +94,12 @@
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .full-width { grid-column: span 3; }
         label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; }
         
         .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; margin-top: 10px; }
         
         /* Output & Tools */
         .toolbar { display: flex; justify-content: flex-end; margin-top: 10px; gap: 5px; align-items: center; }
-        .tool-group { display: flex; gap: 5px; }
         .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 200px; }
         .sm-btn { background: #333; color: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #555; font-size: 12px; }
         .del-btn { background: #b00020; border-color: #790000; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
@@ -106,6 +107,15 @@
         .output-box { background: #000; border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-top: 5px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; color: #ccc; font-size: 15px; line-height: 1.6; }
         .loader { display: none; text-align: center; color: var(--primary); margin-top: 10px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
+
+        /* Testimonials */
+        .testimonial-bar {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: #111; border-top: 1px solid #333;
+            color: #888; font-size: 12px; padding: 10px; text-align: center;
+            font-style: italic; z-index: 10;
+        }
+        .testimonial-text { animation: fade 6s infinite; }
 
         /* Modal */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: none; align-items: center; justify-content: center; }
@@ -116,7 +126,7 @@
 
 <div id="login-wrapper">
     <div class="login-box">
-        <h2>NEXGN SCRIPT WRITER PRO v14.0 <span class="reel-icon">🎞️</span></h2>
+        <h2>NEXGN SCRIPT WRITER PRO v15.0 <span class="reel-icon">🎞️</span></h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
@@ -147,11 +157,11 @@
     </div>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film</button>
+        <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Scripter</button>
         <button class="tab-btn" id="btn-cinematography" onclick="openTab('cinematography')">🎥 Cinematography</button>
         <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
         <button class="tab-btn" onclick="openTab('improve')">✨ Script Improvement</button>
-        <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube</button>
+        <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Scripter</button>
     </div>
 
     <datalist id="languageOptions">
@@ -183,69 +193,43 @@
 
     <div id="film" class="tab-content active">
         <div class="input-grid">
-            <div class="full-width">
-                <label>Movie Idea / Logline</label>
-                <textarea id="filmIdea" rows="2" placeholder="e.g. A young boy finds a magical flute..."></textarea>
-            </div>
-            <div>
-                <label>Genre</label>
-                <select id="filmGenre">
-                    <option>Drama</option><option>Sci-Fi</option><option>Horror</option>
-                    <option>Comedy</option><option>Thriller</option><option>Romance</option>
-                    <option>Action</option><option>Animation</option><option>Fantasy</option>
-                    <option>Mystery</option><option>Historical</option><option>Noir</option>
-                </select>
-            </div>
-            <div>
-                <label>Duration</label>
-                <select id="filmDuration">
-                    <option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option>
-                    <option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option>
-                    <option>40 Minutes</option>
-                </select>
-            </div>
-            <div>
-                <label>Script Language</label>
-                <input list="languageOptions" id="filmLanguage" placeholder="Select Language">
-            </div>
+            <div class="full-width"><label>Movie Idea</label><textarea id="filmIdea" rows="2" placeholder="e.g. A robot learns to paint..."></textarea></div>
+            <div><label>Genre</label><select id="filmGenre"><option>Drama</option><option>Sci-Fi</option><option>Horror</option><option>Comedy</option><option>Thriller</option><option>Romance</option><option>Action</option><option>Animation</option><option>Fantasy</option><option>Mystery</option></select></div>
+            <div><label>Duration</label><select id="filmDuration"><option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option><option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option><option>40 Minutes</option></select></div>
+            <div><label>Dialect (Audio)</label><input list="languageOptions" id="filmAudioLang" placeholder="e.g. Mumbai Hindi"></div>
+            <div><label>Script Format</label><input list="languageOptions" id="filmScriptLang" placeholder="e.g. English"></div>
         </div>
         <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + AUTO CINEMATOGRAPHY</button>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         <div class="toolbar">
             <select id="hist-film" class="history-select" onchange="restoreHistory('film')"><option value="">🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('film')" title="Delete selected">❌</button>
-            <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('filmOutput', 'filmIdea')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
-            </div>
+            <button class="del-btn" onclick="deleteHistoryItem('film')">❌</button>
+            <button class="sm-btn" onclick="clearArea('filmOutput', 'filmIdea')">🗑️ Clear</button>
+            <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
+            <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
         </div>
         <div id="filmOutput" class="output-box"></div>
     </div>
 
     <div id="cinematography" class="tab-content">
         <div class="input-grid">
-            <div class="full-width"><label>Script Context</label><textarea id="cineContext" rows="3" placeholder="Context..."></textarea></div>
-            <div class="full-width"><label>Output Language</label><input list="languageOptions" id="cineLanguage" placeholder="Select Language"></div>
+            <div class="full-width"><label>Script Context</label><textarea id="cineContext" rows="3"></textarea></div>
+            <div><label>Output Language</label><input list="languageOptions" id="cineLanguage"></div>
         </div>
         <button class="action-btn" onclick="generateCinematography()">GENERATE SHOT LIST</button>
         <div id="cineLoader" class="loader">PLANNING SHOTS...</div>
         <div class="toolbar">
             <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('cine')">❌</button>
-            <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('cineOutput')">📋 Copy</button>
-            </div>
+            <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
         </div>
         <div id="cineOutput" class="output-box"></div>
     </div>
 
     <div id="dialogue" class="tab-content">
         <div class="input-grid">
-            <div class="full-width"><label>Context / Scene Summary</label><textarea id="diaContext" rows="3" placeholder="Paste context here..."></textarea></div>
-            <div><label>Spoken Language</label><input list="languageOptions" id="diaAudioLang"></div>
+            <div class="full-width"><label>Context</label><textarea id="diaContext" rows="3"></textarea></div>
+            <div><label>Dialect (Audio)</label><input list="languageOptions" id="diaAudioLang"></div>
             <div><label>Script Format</label><input list="languageOptions" id="diaScriptLang"></div>
         </div>
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
@@ -253,38 +237,22 @@
         <div class="toolbar">
             <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
-            <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
-            </div>
+            <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
         </div>
         <div id="diaOutput" class="output-box"></div>
     </div>
 
     <div id="improve" class="tab-content">
         <div class="input-grid">
-            <div class="full-width">
-                <label>Paste Existing Script</label>
-                <textarea id="improveInput" rows="5" placeholder="Paste script here..."></textarea>
-            </div>
-            <div><label>Instruction</label><select id="improveType">
-                <option>Fix Grammar & Formatting</option>
-                <option>Enhance Emotional Depth</option>
-                <option>Make Dialogues Punchier</option>
-                <option>Shorten / Tighten Pacing</option>
-            </select></div>
+            <div class="full-width"><label>Paste Script</label><textarea id="improveInput" rows="5"></textarea></div>
+            <div><label>Instruction</label><select id="improveType"><option>Fix Grammar</option><option>Make Punchier</option><option>Fix Pacing</option></select></div>
         </div>
         <button class="action-btn" onclick="improveScript()">IMPROVE SCRIPT</button>
         <div id="improveLoader" class="loader">POLISHING...</div>
         <div class="toolbar">
             <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('imp')">❌</button>
-            <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('improveOutput', 'improveInput')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('improveOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('improveOutput')">📋 Copy</button>
-            </div>
+            <button class="sm-btn" onclick="printArea('improveOutput')">🖨️ Print</button>
         </div>
         <div id="improveOutput" class="output-box"></div>
     </div>
@@ -292,22 +260,28 @@
     <div id="youtube" class="tab-content">
         <div class="input-grid">
             <div class="full-width"><label>Title</label><input type="text" id="ytTopic"></div>
-            <div><label>Duration</label><select id="ytDuration"><option>10 Min</option><option>20 Min</option><option>30 Min</option></select></div>
-            <div><label>Category</label><select id="ytCategory"><option>Vlog</option><option>Tech</option><option>Docu</option><option>Comedy</option></select></div>
-            <div><label>Language</label><input list="languageOptions" id="ytLanguage"></div>
+            <div><label>Duration</label><select id="ytDuration"><option>10 Min</option><option>15 Min</option><option>20 Min</option><option>25 Min</option><option>30 Min</option></select></div>
+            <div><label>Category</label><select id="ytCategory">
+                <option>Tech Review</option><option>Vlog</option><option>Documentary</option><option>Gaming</option><option>Tutorial</option>
+                <option>Comedy</option><option>Horror Stories</option><option>Finance</option><option>History</option><option>Science</option>
+                <option>True Crime</option><option>ASMR</option><option>Cooking</option><option>Fitness</option><option>Travel Guide</option>
+                <option>DIY / Crafts</option><option>Productivity</option><option>Meditation</option><option>News / Commentary</option>
+            </select></div>
+            <div><label>Dialect (Audio)</label><input list="languageOptions" id="ytAudioLang"></div>
+            <div><label>Script Format</label><input list="languageOptions" id="ytScriptLang"></div>
         </div>
         <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option>🕒 Recent</option></select>
+            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
-            <div class="tool-group">
-                <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
-                <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
-                <button class="sm-btn" onclick="copyText('ytOutput')">📋 Copy</button>
-            </div>
+            <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
         </div>
         <div id="ytOutput" class="output-box"></div>
+    </div>
+
+    <div class="testimonial-bar">
+        <div id="testimonialText" class="testimonial-text">"NEXGN Script Writer changed my filmmaking career!" - Rohan K.</div>
     </div>
 
 </div>
@@ -340,13 +314,43 @@
             currentUser = sessionUser;
             initApp();
         }
+        
+        // Load stored key if exists
         const key = localStorage.getItem('nisff_key');
         if(key) document.getElementById('apiKey').value = key;
         
         // Defaults
-        document.getElementById('filmLanguage').value = "English";
+        document.getElementById('filmAudioLang').value = "Hindi";
+        document.getElementById('filmScriptLang').value = "English";
+        document.getElementById('diaAudioLang').value = "Hindi";
+        document.getElementById('diaScriptLang').value = "English";
+        document.getElementById('ytAudioLang').value = "English";
+        document.getElementById('ytScriptLang').value = "English";
+
+        startTestimonials();
     };
 
+    // --- TESTIMONIALS ---
+    function startTestimonials() {
+        const quotes = [
+            "NEXGN Script Writer changed my filmmaking career! - Rohan K.",
+            "Best AI tool for dialogue writing. Highly recommended. - Priya S.",
+            "The cinematography shot lists are a game changer. - Amit D.",
+            "Finally, a tool that understands Indian dialects correctly! - Suresh M.",
+            "Writes full YouTube scripts in seconds. Amazing. - TechGuru"
+        ];
+        let i = 0;
+        setInterval(() => {
+            const el = document.getElementById('testimonialText');
+            el.style.animation = 'none';
+            el.offsetHeight; /* trigger reflow */
+            el.style.animation = 'fade 6s infinite';
+            el.innerText = quotes[i];
+            i = (i + 1) % quotes.length;
+        }, 6000);
+    }
+
+    // --- AUTH ---
     function handleLogin() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
@@ -369,7 +373,6 @@
         
         const userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
         if (userData.photo) document.getElementById('userAvatarDisplay').src = userData.photo;
-        if (userData.apiKey) document.getElementById('apiKey').value = userData.apiKey;
         
         ['film', 'dia', 'cine', 'imp', 'yt'].forEach(cat => updateHistoryUI(cat));
     }
@@ -386,9 +389,6 @@
     }
     function saveKey() {
         const key = document.getElementById('apiKey').value;
-        let userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
-        userData.apiKey = key;
-        localStorage.setItem(`nisff_data_${currentUser}`, JSON.stringify(userData));
         localStorage.setItem('nisff_key', key);
     }
     function openPassModal() { document.getElementById('passModal').style.display = 'flex'; toggleProfileMenu(); }
@@ -397,14 +397,12 @@
 
     function saveNewPassword() {
         const newPass = document.getElementById('newPassInput').value;
-        if (!newPass) return alert("Enter password");
         let users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         const idx = users.findIndex(u => u.u === currentUser);
         if (idx !== -1) {
             users[idx].p = newPass;
             localStorage.setItem('nisff_users', JSON.stringify(users));
-            alert("Password Updated!");
-            closeModals();
+            alert("Updated!"); closeModals();
         }
     }
 
@@ -450,18 +448,11 @@
         win.document.close(); win.print();
     }
 
-    // --- HTML STRIPPER (STRICT) ---
-    function stripHtml(html) {
-        // Removes <center>, <b>, <i> tags completely
-        return html.replace(/<[^>]*>?/gm, '');
-    }
-
-    // --- API CALL ---
+    // --- API CALL (GEMINI 2.5 LITE / 1.5 FLASH FALLBACK) ---
     async function callGemini(prompt) {
         const key = document.getElementById('apiKey').value;
         if (!key) { alert("Please enter API Key in Profile Menu"); return null; }
 
-        // Using gemini-2.5-flash-lite
         let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
 
         const payload = {
@@ -478,7 +469,7 @@
             let response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             let data = await response.json();
 
-            // Fallback to 1.5 if 2.5 fails
+            // FALLBACK logic if 2.5 is not available
             if (data.error && (data.error.code === 404 || data.error.message.includes("not found"))) {
                 url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
                 response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -488,7 +479,9 @@
             if (data.error) { alert("Error: " + data.error.message); return null; }
             if (!data.candidates) { alert("No content."); return null; }
             
-            return stripHtml(data.candidates[0].content.parts[0].text);
+            // Clean Text
+            let text = data.candidates[0].content.parts[0].text;
+            return text.replace(/<[^>]*>?/gm, '').replace(/\*\*/g, ""); 
 
         } catch (e) { alert("Error: " + e.message); return null; }
     }
@@ -509,7 +502,9 @@
         const key = getHistoryKey(category);
         let hist = JSON.parse(localStorage.getItem(key) || '[]');
         const select = document.getElementById(`hist-${category}`);
-        select.innerHTML = '<option value="">🕒 Recent Scripts</option>';
+        // Keep only first option
+        while (select.options.length > 1) { select.remove(1); }
+        
         hist.forEach((item, index) => {
             const opt = document.createElement('option');
             opt.value = index; opt.text = item.time;
@@ -542,41 +537,46 @@
         }
     }
 
-    // --- GENERATORS (STRICT LANGUAGE) ---
-    function getStrictInstruction(lang) {
-        if(lang === 'English') return "Write in English.";
-        if(lang === 'Hinglish') return "Write in Hinglish (Hindi words written in English alphabet).";
-        
-        return `
-        STRICT LANGUAGE ENFORCEMENT:
-        1. **Write ONLY in ${lang}**.
-        2. Use the **Native ${lang} Script** (e.g., Assamese script for Assamese, Devanagari for Hindi).
-        3. Do NOT write dialogue in English unless absolutely necessary for a character trait.
-        4. Do NOT verify the language in the output, just write the script.
+    // --- PROMPTS ---
+    function getPrompt(type, params) {
+        const langInstruction = `
+        STRICT LANGUAGE RULES:
+        1. **Spoken Dialogue/Audio**: MUST be in **${params.audioLang}**.
+        2. **Script Description/Action Lines**: MUST be in **${params.scriptLang}**.
+        Example: If Audio is Hindi and Script is English -> Dialogue: "Kya hua?" | Action: He looks confused.
+        NO HTML TAGS.
         `;
+
+        if (type === 'film') {
+            return `Write a Short Film Script. Title: ${params.idea}. Genre: ${params.genre}. Duration: ${params.dur}. ${langInstruction} Format: Standard Screenplay.`;
+        }
+        if (type === 'dia') {
+            return `Write dialogue based on: ${params.ctx}. ${langInstruction} Format: Screenplay Dialogue.`;
+        }
+        if (type === 'cine') {
+            return `Create a Shot List for: ${params.ctx}. Language: ${params.scriptLang}. Format: Shot Type | Description.`;
+        }
+        if (type === 'yt') {
+            return `Write a ${params.dur} YouTube Script. Title: ${params.topic}. Category: ${params.cat}. ${langInstruction}`;
+        }
+        if (type === 'imp') {
+            return `Improve this script. Instruction: ${params.type}. Keep original language. \n\n${params.input}`;
+        }
     }
 
     async function generateFilm() {
         const idea = document.getElementById('filmIdea').value;
-        const lang = document.getElementById('filmLanguage').value;
-        const genre = document.getElementById('filmGenre').value;
-        const dur = document.getElementById('filmDuration').value;
-
-        if(!idea) return alert("Enter Idea");
+        const audioLang = document.getElementById('filmAudioLang').value;
+        const scriptLang = document.getElementById('filmScriptLang').value;
         
+        if(!idea) return alert("Enter Idea");
         document.getElementById('filmLoader').style.display = 'block';
         
-        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script.
-        ${getStrictInstruction(lang)}
-        
-        Required Format:
-        TITLE: [Title in ${lang}]
-        LOGLINE: [Logline in ${lang}]
-        SCENE 1: [Header]
-        [Action]
-        [CHARACTER]: [Dialogue]
-        
-        Details: Title: ${idea} | Genre: ${genre} | Duration: ${dur}`;
+        const prompt = getPrompt('film', { 
+            idea, audioLang, scriptLang, 
+            genre: document.getElementById('filmGenre').value, 
+            dur: document.getElementById('filmDuration').value 
+        });
 
         const script = await callGemini(prompt);
         document.getElementById('filmLoader').style.display = 'none';
@@ -585,16 +585,17 @@
             document.getElementById('filmOutput').innerText = script;
             addToHistory('film', script);
             
-            // Auto Trigger Cinematography
-            document.getElementById('cineContext').value = `Script Title: ${idea}`;
-            document.getElementById('cineLanguage').value = lang;
-            autoGenerateCinematography(idea, genre, lang);
+            // Auto Trigger
+            document.getElementById('cineContext').value = `Script: ${idea}`;
+            document.getElementById('cineLanguage').value = scriptLang;
+            
+            autoGenerateCinematography(idea, scriptLang);
         }
     }
 
-    async function autoGenerateCinematography(idea, genre, lang) {
+    async function autoGenerateCinematography(idea, lang) {
         const btn = document.getElementById('btn-cinematography');
-        const res = await callGemini(`Create a Shot List for film "${idea}" (${genre}). ${getStrictInstruction(lang)}`);
+        const res = await callGemini(`Create a Shot List for: ${idea}. Language: ${lang}. Plain Text.`);
         if(res) {
             document.getElementById('cineOutput').innerText = res;
             addToHistory('cine', res);
@@ -602,21 +603,21 @@
         }
     }
 
-    // Independent Generators
     async function generateDialogue() {
         const ctx = document.getElementById('diaContext').value;
-        const lang = document.getElementById('diaAudioLang').value;
+        const audioLang = document.getElementById('diaAudioLang').value;
+        const scriptLang = document.getElementById('diaScriptLang').value;
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write movie dialogues for: ${ctx}. ${getStrictInstruction(lang)}`);
+        const res = await callGemini(getPrompt('dia', { ctx, audioLang, scriptLang }));
         document.getElementById('diaLoader').style.display = 'none';
         if(res) { document.getElementById('diaOutput').innerText = res; addToHistory('dia', res); }
     }
 
     async function generateCinematography() {
         const ctx = document.getElementById('cineContext').value;
-        const lang = document.getElementById('cineLanguage').value;
+        const scriptLang = document.getElementById('cineLanguage').value;
         document.getElementById('cineLoader').style.display = 'block';
-        const res = await callGemini(`Create Shot List for: ${ctx}. ${getStrictInstruction(lang)}`);
+        const res = await callGemini(getPrompt('cine', { ctx, scriptLang }));
         document.getElementById('cineLoader').style.display = 'none';
         if(res) { document.getElementById('cineOutput').innerText = res; addToHistory('cine', res); }
     }
@@ -625,18 +626,22 @@
         const input = document.getElementById('improveInput').value;
         const type = document.getElementById('improveType').value;
         if(!input) return alert("Paste script first");
-        
         document.getElementById('improveLoader').style.display = 'block';
-        const res = await callGemini(`Improve this script based on: ${type}. Keep the original language. \n\nScript: ${input}`);
+        const res = await callGemini(getPrompt('imp', { input, type }));
         document.getElementById('improveLoader').style.display = 'none';
         if(res) { document.getElementById('improveOutput').innerText = res; addToHistory('imp', res); }
     }
 
     async function generateYouTube() {
         const topic = document.getElementById('ytTopic').value;
-        const lang = document.getElementById('ytLanguage').value;
+        const audioLang = document.getElementById('ytAudioLang').value;
+        const scriptLang = document.getElementById('ytScriptLang').value;
         document.getElementById('ytLoader').style.display = 'block';
-        const res = await callGemini(`Write YouTube script about: ${topic}. ${getStrictInstruction(lang)}`);
+        const res = await callGemini(getPrompt('yt', { 
+            topic, audioLang, scriptLang, 
+            dur: document.getElementById('ytDuration').value, 
+            cat: document.getElementById('ytCategory').value 
+        }));
         document.getElementById('ytLoader').style.display = 'none';
         if(res) { document.getElementById('ytOutput').innerText = res; addToHistory('yt', res); }
     }
