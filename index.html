@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v4.0</title>
+    <title>NISFF Script Writer Pro v5.0</title>
     <style>
         :root {
             --primary: #d4af37; /* Festival Gold */
@@ -53,10 +53,21 @@
         /* Buttons */
         .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.2s; }
         .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .copy-btn { background: #333; color: #fff; border: 1px solid #555; padding: 5px 15px; border-radius: 4px; cursor: pointer; float: right; font-size: 12px; }
+        
+        /* Toolbar (Copy/Print/History) */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 5px 0; border-bottom: 1px solid #222; }
+        .tool-group { display: flex; gap: 10px; }
+        
+        .sm-btn { background: #333; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .sm-btn:hover { background: #555; border-color: #777; }
+        .print-btn { background: #2c3e50; border-color: #34495e; }
+        .print-btn:hover { background: #34495e; }
+
+        /* History Dropdown */
+        .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 200px; }
 
         /* Output Boxes */
-        .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 20px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
+        .output-box { background: #000; border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-top: 10px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
         
         /* Loader & Error */
         .loader { display: none; text-align: center; color: var(--primary); margin-top: 20px; font-weight: bold; }
@@ -68,14 +79,14 @@
 
 <div class="app-shell">
     <div class="header">
-        <h1>NISFF Script Writer Pro v4.0</h1>
+        <h1>NISFF Script Writer Pro v5.0</h1>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
     </div>
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Script</button>
         <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
-        <button class="tab-btn" id="btn-camera" onclick="openTab('camera')">🎥 Camera & Drone Angles</button>
+        <button class="tab-btn" id="btn-camera" onclick="openTab('camera')">🎥 Camera & Drone</button>
         <button class="tab-btn" onclick="openTab('mini')">📱 Mini/Reels Video</button>
         <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Script</button>
     </div>
@@ -84,13 +95,25 @@
         <option value="English">English</option>
         <option value="Hindi">Hindi (हिन्दी)</option>
         <option value="Marathi">Marathi (मराठी)</option>
-        <option value="Bengali">Bengali</option>
-        <option value="Tamil">Tamil</option>
-        <option value="Telugu">Telugu</option>
-        <option value="Malayalam">Malayalam</option>
-        <option value="Kannada">Kannada</option>
-        <option value="Gujarati">Gujarati</option>
-        <option value="Punjabi">Punjabi</option>
+        <option value="Bengali">Bengali (বাংলা)</option>
+        <option value="Tamil">Tamil (தமிழ்)</option>
+        <option value="Telugu">Telugu (తెలుగు)</option>
+        <option value="Urdu">Urdu (اردو)</option>
+        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+        <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
+        <option value="Malayalam">Malayalam (മലയാളം)</option>
+        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+        <option value="Assamese">Assamese (অসমীয়া)</option>
+        <option value="Maithili">Maithili (मैथिली)</option>
+        <option value="Santali">Santali (संथाली)</option>
+        <option value="Kashmiri">Kashmiri (कश्मीरी)</option>
+        <option value="Nepali">Nepali (नेपाली)</option>
+        <option value="Konkani">Konkani (कोंकणी)</option>
+        <option value="Sindhi">Sindhi (सिंधी)</option>
+        <option value="Dogri">Dogri (डोगरी)</option>
+        <option value="Manipuri">Manipuri (মণিপুরী)</option>
+        <option value="Bodo">Bodo (बर')</option>
         <option value="Spanish">Spanish</option>
         <option value="French">French</option>
         <option value="German">German</option>
@@ -145,10 +168,17 @@
         <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + DIALOGUE + SHOT LIST</button>
         <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
         <div id="filmError" class="error-msg"></div>
-        <div class="output-box">
-            <button class="copy-btn" onclick="copyText('filmOutput')">Copy</button>
-            <div id="filmOutput"></div>
+        
+        <div class="toolbar">
+            <select id="hist-film" class="history-select" onchange="restoreHistory('film')">
+                <option value="">🕒 Restore History...</option>
+            </select>
+            <div class="tool-group">
+                <button class="sm-btn print-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
+            </div>
         </div>
+        <div id="filmOutput" class="output-box"></div>
     </div>
 
     <div id="dialogue" class="tab-content">
@@ -164,10 +194,17 @@
         </div>
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUE ONLY</button>
         <div id="diaLoader" class="loader">CRAFTING DIALOGUES...</div>
-        <div class="output-box">
-            <button class="copy-btn" onclick="copyText('diaOutput')">Copy</button>
-            <div id="diaOutput">No dialogue generated yet.</div>
+        
+        <div class="toolbar">
+            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')">
+                <option value="">🕒 Restore History...</option>
+            </select>
+            <div class="tool-group">
+                <button class="sm-btn print-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
+            </div>
         </div>
+        <div id="diaOutput" class="output-box">No dialogue generated yet.</div>
     </div>
 
     <div id="camera" class="tab-content">
@@ -176,13 +213,24 @@
                 <label>Script Summary / Scene Context</label>
                 <textarea id="cameraContext" rows="3" placeholder="Paste scene details here..."></textarea>
             </div>
+            <div class="full-width">
+                <label>Output Language</label>
+                <input list="languageOptions" id="cameraLanguage" placeholder="Same as Script (or Select)">
+            </div>
         </div>
         <button class="action-btn" onclick="generateCamera()">GENERATE SHOT LIST & DRONE ANGLES</button>
         <div id="cameraLoader" class="loader">PLANNING CINEMATOGRAPHY...</div>
-        <div class="output-box">
-            <button class="copy-btn" onclick="copyText('cameraOutput')">Copy</button>
-            <div id="cameraOutput">No shot list generated yet.</div>
+        
+        <div class="toolbar">
+            <select id="hist-camera" class="history-select" onchange="restoreHistory('camera')">
+                <option value="">🕒 Restore History...</option>
+            </select>
+            <div class="tool-group">
+                <button class="sm-btn print-btn" onclick="printArea('cameraOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('cameraOutput')">📋 Copy</button>
+            </div>
         </div>
+        <div id="cameraOutput" class="output-box">No shot list generated yet.</div>
     </div>
 
     <div id="mini" class="tab-content">
@@ -200,7 +248,7 @@
                 </select>
             </div>
             <div>
-                <label>Category (Genre)</label>
+                <label>Category</label>
                 <select id="miniCategory">
                     <option>Comedy</option>
                     <option>Horror</option>
@@ -211,6 +259,8 @@
                     <option>Motivation</option>
                     <option>Tech / Review</option>
                     <option>Food / Cooking</option>
+                    <option>Thriller / Suspense</option>
+                    <option>Animation</option>
                 </select>
             </div>
             <div>
@@ -220,10 +270,17 @@
         </div>
         <button class="action-btn" onclick="generateMini()">GENERATE REEL SCRIPT</button>
         <div id="miniLoader" class="loader">Creating...</div>
-        <div class="output-box">
-            <button class="copy-btn" onclick="copyText('miniOutput')">Copy</button>
-            <div id="miniOutput"></div>
+        
+        <div class="toolbar">
+            <select id="hist-mini" class="history-select" onchange="restoreHistory('mini')">
+                <option value="">🕒 Restore History...</option>
+            </select>
+            <div class="tool-group">
+                <button class="sm-btn print-btn" onclick="printArea('miniOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('miniOutput')">📋 Copy</button>
+            </div>
         </div>
+        <div id="miniOutput" class="output-box"></div>
     </div>
 
     <div id="youtube" class="tab-content">
@@ -254,6 +311,8 @@
                     <option>Storytime</option>
                     <option>Vlog</option>
                     <option>Education</option>
+                    <option>Animation</option>
+                    <option>Action</option>
                 </select>
             </div>
             <div>
@@ -263,10 +322,17 @@
         </div>
         <button class="action-btn" onclick="generateYouTube()">GENERATE YOUTUBE SCRIPT</button>
         <div id="ytLoader" class="loader">Writing Script...</div>
-        <div class="output-box">
-            <button class="copy-btn" onclick="copyText('ytOutput')">Copy</button>
-            <div id="ytOutput"></div>
+        
+        <div class="toolbar">
+            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')">
+                <option value="">🕒 Restore History...</option>
+            </select>
+            <div class="tool-group">
+                <button class="sm-btn print-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
+                <button class="sm-btn" onclick="copyText('ytOutput')">📋 Copy</button>
+            </div>
         </div>
+        <div id="ytOutput" class="output-box"></div>
     </div>
 
 </div>
@@ -283,8 +349,16 @@
         // Defaults
         document.getElementById('filmLanguage').value = "English";
         document.getElementById('diaLanguage').value = "English";
+        document.getElementById('cameraLanguage').value = "English";
         document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
+
+        // Load History for all tabs
+        updateHistoryUI('film');
+        updateHistoryUI('dia');
+        updateHistoryUI('camera');
+        updateHistoryUI('mini');
+        updateHistoryUI('yt');
     };
 
     function openTab(id) {
@@ -309,6 +383,72 @@
     function copyText(id) {
         navigator.clipboard.writeText(document.getElementById(id).innerText);
         alert("Copied!");
+    }
+
+    function printArea(id) {
+        const content = document.getElementById(id).innerHTML;
+        const win = window.open('', '', 'height=700,width=900');
+        win.document.write('<html><head><title>Print Script</title>');
+        win.document.write('<style>');
+        win.document.write('body{font-family:"Courier New", monospace; padding:40px; line-height:1.6; color:#000;}');
+        win.document.write('white-space: pre-wrap;');
+        win.document.write('</style></head><body>');
+        win.document.write(content);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.print();
+    }
+
+    // --- HISTORY MANAGER ---
+    function addToHistory(category, text) {
+        let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
+        if(!hist[category]) hist[category] = [];
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const snippet = text.substring(0, 30).replace(/\n/g, "") + "...";
+        
+        hist[category].unshift({ time: timestamp, preview: snippet, full: text });
+        
+        // Keep only last 5
+        if(hist[category].length > 5) hist[category].pop();
+        
+        localStorage.setItem('nisff_history', JSON.stringify(hist));
+        updateHistoryUI(category);
+    }
+
+    function updateHistoryUI(category) {
+        let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
+        const list = hist[category] || [];
+        const select = document.getElementById(`hist-${category}`);
+        
+        // Clear existing options except first
+        select.innerHTML = '<option value="">🕒 Restore History...</option>';
+        
+        list.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.text = `${item.time} - ${item.preview}`;
+            select.appendChild(opt);
+        });
+    }
+
+    function restoreHistory(category) {
+        const select = document.getElementById(`hist-${category}`);
+        const index = select.value;
+        if(index === "") return;
+
+        let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
+        const item = hist[category][index];
+        
+        const outputIds = {
+            'film': 'filmOutput',
+            'dia': 'diaOutput',
+            'camera': 'cameraOutput',
+            'mini': 'miniOutput',
+            'yt': 'ytOutput'
+        };
+        
+        document.getElementById(outputIds[category]).innerText = item.full;
     }
 
     // --- API CALLER (GEMINI 2.5 FLASH LITE) ---
@@ -367,7 +507,7 @@
         errorDiv.style.display = 'none';
         output.innerText = "";
 
-        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script in **${lang}**.
+        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script in **${lang}** (use native script if possible).
         Title/Concept: ${idea}
         Genre: ${genre}
         Target Duration: ${dur}
@@ -379,16 +519,19 @@
 
         if (script) {
             output.innerText = script;
+            addToHistory('film', script);
+            
             lastGeneratedScript = script;
             
             // Auto fill contexts
             document.getElementById('diaContext').value = `Based on script: ${idea} (${genre})`;
-            document.getElementById('diaLanguage').value = lang; // Set dialogue lang
+            document.getElementById('diaLanguage').value = lang; 
             document.getElementById('cameraContext').value = `Cinematography for: ${idea} (${genre})`;
+            document.getElementById('cameraLanguage').value = lang;
 
             // Trigger background tasks
             autoGenerateDialogue(script, lang);
-            autoGenerateCamera(idea, genre);
+            autoGenerateCamera(idea, genre, lang);
         } else {
             errorDiv.innerText = "Failed to generate script. Check API Key.";
             errorDiv.style.display = 'block';
@@ -402,6 +545,7 @@
         const res = await callGemini(prompt);
         if (res) {
             document.getElementById('diaOutput').innerText = res;
+            addToHistory('dia', res);
             btn.classList.add('has-data');
         }
     }
@@ -414,15 +558,19 @@
         document.getElementById('diaLoader').style.display = 'block';
         const res = await callGemini(`Write intense movie dialogue based on: ${context}. Language: **${lang}**. Format as screenplay.`);
         document.getElementById('diaLoader').style.display = 'none';
-        if(res) document.getElementById('diaOutput').innerText = res;
+        if(res) {
+            document.getElementById('diaOutput').innerText = res;
+            addToHistory('dia', res);
+        }
     }
 
-    // --- 3. Camera & Drone Angles (NEW) ---
-    async function autoGenerateCamera(title, genre) {
+    // --- 3. Camera & Drone Angles (Syncs Language) ---
+    async function autoGenerateCamera(title, genre, lang) {
         const btn = document.getElementById('btn-camera');
         
         const prompt = `Act as a Director of Photography (DoP).
         For the film "${title}" (${genre}), list 5-7 creative Camera Angles and Drone Shots.
+        **Output Language: ${lang}** (Use native script).
         Format:
         1. Shot Type (e.g., Drone High Angle, Close Up)
         2. Description of movement and visual focus.
@@ -431,20 +579,25 @@
         const res = await callGemini(prompt);
         if (res) {
             document.getElementById('cameraOutput').innerText = res;
+            addToHistory('camera', res);
             btn.classList.add('has-data');
         }
     }
 
     async function generateCamera() {
         const ctx = document.getElementById('cameraContext').value;
+        const lang = document.getElementById('cameraLanguage').value;
         if(!ctx) return alert("Enter scene details!");
         document.getElementById('cameraLoader').style.display = 'block';
         
-        const prompt = `Act as a Cinematographer. Suggest creative Camera Angles, Lens Choices, and Drone Shots for: "${ctx}". Explain the visual impact.`;
+        const prompt = `Act as a Cinematographer. Suggest creative Camera Angles, Lens Choices, and Drone Shots for: "${ctx}". Explain the visual impact. **Language: ${lang}**.`;
 
         const res = await callGemini(prompt);
         document.getElementById('cameraLoader').style.display = 'none';
-        if(res) document.getElementById('cameraOutput').innerText = res;
+        if(res) {
+            document.getElementById('cameraOutput').innerText = res;
+            addToHistory('camera', res);
+        }
     }
 
     // --- 4. Mini Video ---
@@ -461,7 +614,10 @@
 
         const res = await callGemini(prompt);
         document.getElementById('miniLoader').style.display = 'none';
-        if(res) document.getElementById('miniOutput').innerText = res;
+        if(res) {
+            document.getElementById('miniOutput').innerText = res;
+            addToHistory('mini', res);
+        }
     }
 
     // --- 5. YouTube Script ---
@@ -478,7 +634,10 @@
 
         const res = await callGemini(prompt);
         document.getElementById('ytLoader').style.display = 'none';
-        if(res) document.getElementById('ytOutput').innerText = res;
+        if(res) {
+            document.getElementById('ytOutput').innerText = res;
+            addToHistory('yt', res);
+        }
     }
 
 </script>
