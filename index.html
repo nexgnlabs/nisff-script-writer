@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NISFF Script Writer Pro v5.0</title>
+    <title>NISFF Script Writer Pro v5.1</title>
     <style>
         :root {
             --primary: #d4af37; /* Festival Gold */
@@ -54,16 +54,12 @@
         .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.2s; }
         .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
         
-        /* Toolbar (Copy/Print/History) */
+        /* Toolbar */
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 5px 0; border-bottom: 1px solid #222; }
         .tool-group { display: flex; gap: 10px; }
-        
         .sm-btn { background: #333; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; }
         .sm-btn:hover { background: #555; border-color: #777; }
         .print-btn { background: #2c3e50; border-color: #34495e; }
-        .print-btn:hover { background: #34495e; }
-
-        /* History Dropdown */
         .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 200px; }
 
         /* Output Boxes */
@@ -79,7 +75,7 @@
 
 <div class="app-shell">
     <div class="header">
-        <h1>NISFF Script Writer Pro v5.0</h1>
+        <h1>NISFF Script Writer Pro v5.1</h1>
         <input type="password" id="apiKey" class="api-input" placeholder="Enter Gemini API Key">
     </div>
 
@@ -95,6 +91,7 @@
         <option value="English">English</option>
         <option value="Hindi">Hindi (हिन्दी)</option>
         <option value="Marathi">Marathi (मराठी)</option>
+        <option value="Assamese">Assamese (অসমীয়া)</option>
         <option value="Bengali">Bengali (বাংলা)</option>
         <option value="Tamil">Tamil (தமிழ்)</option>
         <option value="Telugu">Telugu (తెలుగు)</option>
@@ -104,7 +101,6 @@
         <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
         <option value="Malayalam">Malayalam (മലയാളം)</option>
         <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-        <option value="Assamese">Assamese (অসমীয়া)</option>
         <option value="Maithili">Maithili (मैथिली)</option>
         <option value="Santali">Santali (संथाली)</option>
         <option value="Kashmiri">Kashmiri (कश्मीरी)</option>
@@ -117,11 +113,6 @@
         <option value="Spanish">Spanish</option>
         <option value="French">French</option>
         <option value="German">German</option>
-        <option value="Chinese">Chinese</option>
-        <option value="Japanese">Japanese</option>
-        <option value="Korean">Korean</option>
-        <option value="Russian">Russian</option>
-        <option value="Arabic">Arabic</option>
     </datalist>
 
     <div id="film" class="tab-content active">
@@ -161,7 +152,7 @@
                 </select>
             </div>
             <div>
-                <label>Script Language</label>
+                <label>Script Language (Strict)</label>
                 <input list="languageOptions" id="filmLanguage" placeholder="Select Language">
             </div>
         </div>
@@ -188,7 +179,7 @@
                 <textarea id="diaContext" rows="3" placeholder="Paste context here..."></textarea>
             </div>
             <div class="full-width">
-                <label>Dialogue Language</label>
+                <label>Dialogue Language (Strict)</label>
                 <input list="languageOptions" id="diaLanguage" placeholder="Select Language for Dialogue">
             </div>
         </div>
@@ -250,21 +241,15 @@
             <div>
                 <label>Category</label>
                 <select id="miniCategory">
-                    <option>Comedy</option>
-                    <option>Horror</option>
-                    <option>Drama</option>
-                    <option>Educational / Tips</option>
-                    <option>Dance / Music</option>
-                    <option>Vlog / Lifestyle</option>
-                    <option>Motivation</option>
-                    <option>Tech / Review</option>
-                    <option>Food / Cooking</option>
-                    <option>Thriller / Suspense</option>
-                    <option>Animation</option>
+                    <option>Comedy</option><option>Horror</option><option>Drama</option>
+                    <option>Educational / Tips</option><option>Dance / Music</option>
+                    <option>Vlog / Lifestyle</option><option>Motivation</option><option>Tech / Review</option>
+                    <option>Food / Cooking</option><option>Thriller / Suspense</option>
+                    <option>Animation</option><option>Action / Transition</option>
                 </select>
             </div>
             <div>
-                <label>Language</label>
+                <label>Language (Strict)</label>
                 <input list="languageOptions" id="miniLanguage" placeholder="Select Language">
             </div>
         </div>
@@ -298,25 +283,17 @@
                 </select>
             </div>
             <div>
-                <label>Category (Genre)</label>
+                <label>Category</label>
                 <select id="ytCategory">
-                    <option>Comedy</option>
-                    <option>Horror</option>
-                    <option>Drama</option>
-                    <option>Sci-Fi / Futurist</option>
-                    <option>Documentary</option>
-                    <option>Filmmaking Tutorial</option>
-                    <option>Tech Review</option>
-                    <option>Gaming</option>
-                    <option>Storytime</option>
-                    <option>Vlog</option>
-                    <option>Education</option>
-                    <option>Animation</option>
-                    <option>Action</option>
+                    <option>Comedy</option><option>Horror</option><option>Drama</option>
+                    <option>Sci-Fi / Futurist</option><option>Documentary</option>
+                    <option>Filmmaking Tutorial</option><option>Tech Review</option>
+                    <option>Gaming</option><option>Storytime</option><option>Vlog</option>
+                    <option>Education</option><option>Animation</option><option>Action</option>
                 </select>
             </div>
             <div>
-                <label>Language</label>
+                <label>Language (Strict)</label>
                 <input list="languageOptions" id="ytLanguage" placeholder="Select Language">
             </div>
         </div>
@@ -409,7 +386,6 @@
         
         hist[category].unshift({ time: timestamp, preview: snippet, full: text });
         
-        // Keep only last 5
         if(hist[category].length > 5) hist[category].pop();
         
         localStorage.setItem('nisff_history', JSON.stringify(hist));
@@ -420,10 +396,7 @@
         let hist = JSON.parse(localStorage.getItem('nisff_history') || '{}');
         const list = hist[category] || [];
         const select = document.getElementById(`hist-${category}`);
-        
-        // Clear existing options except first
         select.innerHTML = '<option value="">🕒 Restore History...</option>';
-        
         list.forEach((item, index) => {
             const opt = document.createElement('option');
             opt.value = index;
@@ -441,17 +414,14 @@
         const item = hist[category][index];
         
         const outputIds = {
-            'film': 'filmOutput',
-            'dia': 'diaOutput',
-            'camera': 'cameraOutput',
-            'mini': 'miniOutput',
-            'yt': 'ytOutput'
+            'film': 'filmOutput', 'dia': 'diaOutput',
+            'camera': 'cameraOutput', 'mini': 'miniOutput', 'yt': 'ytOutput'
         };
         
         document.getElementById(outputIds[category]).innerText = item.full;
     }
 
-    // --- API CALLER (GEMINI 2.5 FLASH LITE) ---
+    // --- API CALLER ---
     async function callGemini(prompt) {
         const key = getKey();
         if(!key) { alert("Please enter API Key"); return null; }
@@ -507,11 +477,23 @@
         errorDiv.style.display = 'none';
         output.innerText = "";
 
-        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script in **${lang}** (use native script if possible).
+        // STRICT FORMATTING PROMPT
+        const prompt = `Act as a Professional Screenwriter for NISFF.
+        Task: Write a Short Film Script.
+        
+        STRICT LANGUAGE INSTRUCTION:
+        - The **Dialogue** and **Action Lines** MUST be written in **${lang}** (using native ${lang} script/characters).
+        - Scene Headings (e.g., INT. HOUSE - DAY) can be in English or ${lang}.
+        
+        STRICT FORMATTING:
+        - Do NOT use HTML tags like <center>.
+        - Use UPPERCASE for Character Names.
+        - Use Standard Screenplay Indentation logic (text-based).
+        
+        Details:
         Title/Concept: ${idea}
         Genre: ${genre}
-        Target Duration: ${dur}
-        Format: Standard Screenplay Format (Scene Heading, Action, Character, Dialogue).`;
+        Target Duration: ${dur}`;
 
         const script = await callGemini(prompt);
         
@@ -520,7 +502,6 @@
         if (script) {
             output.innerText = script;
             addToHistory('film', script);
-            
             lastGeneratedScript = script;
             
             // Auto fill contexts
@@ -541,7 +522,10 @@
     // --- 2. Dialogue Generator ---
     async function autoGenerateDialogue(fullScript, lang) {
         const btn = document.getElementById('btn-dialogue');
-        const prompt = `Based on this script: "${fullScript.substring(0, 1000)}...". Extract or rewrite 3 impactful dialogue exchanges in **${lang}**. Format: Character: [Dialogue].`;
+        const prompt = `Based on this script: "${fullScript.substring(0, 1000)}...". 
+        Task: Extract/Rewrite 3 key dialogue exchanges.
+        STRICT INSTRUCTION: Output dialogue ONLY in **${lang}** (Native Script). No English translation unless requested.`;
+        
         const res = await callGemini(prompt);
         if (res) {
             document.getElementById('diaOutput').innerText = res;
@@ -556,7 +540,7 @@
         if(!context) return alert("Enter context!");
         
         document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write intense movie dialogue based on: ${context}. Language: **${lang}**. Format as screenplay.`);
+        const res = await callGemini(`Write intense movie dialogue based on: ${context}. STRICT INSTRUCTION: Write ONLY in **${lang}** (Native Script).`);
         document.getElementById('diaLoader').style.display = 'none';
         if(res) {
             document.getElementById('diaOutput').innerText = res;
@@ -564,17 +548,13 @@
         }
     }
 
-    // --- 3. Camera & Drone Angles (Syncs Language) ---
+    // --- 3. Camera & Drone Angles ---
     async function autoGenerateCamera(title, genre, lang) {
         const btn = document.getElementById('btn-camera');
         
         const prompt = `Act as a Director of Photography (DoP).
-        For the film "${title}" (${genre}), list 5-7 creative Camera Angles and Drone Shots.
-        **Output Language: ${lang}** (Use native script).
-        Format:
-        1. Shot Type (e.g., Drone High Angle, Close Up)
-        2. Description of movement and visual focus.
-        3. Why this shot enhances the ${genre} mood.`;
+        Task: List 5-7 creative Camera Angles and Drone Shots for "${title}".
+        STRICT INSTRUCTION: Write the descriptions in **${lang}** (Native Script).`;
 
         const res = await callGemini(prompt);
         if (res) {
@@ -590,7 +570,8 @@
         if(!ctx) return alert("Enter scene details!");
         document.getElementById('cameraLoader').style.display = 'block';
         
-        const prompt = `Act as a Cinematographer. Suggest creative Camera Angles, Lens Choices, and Drone Shots for: "${ctx}". Explain the visual impact. **Language: ${lang}**.`;
+        const prompt = `Act as a Cinematographer. Suggest creative Camera Angles, Lens Choices, and Drone Shots for: "${ctx}". 
+        STRICT INSTRUCTION: Write the descriptions in **${lang}** (Native Script).`;
 
         const res = await callGemini(prompt);
         document.getElementById('cameraLoader').style.display = 'none';
@@ -610,7 +591,9 @@
         if(!topic) return alert("Enter topic!");
         document.getElementById('miniLoader').style.display = 'block';
 
-        const prompt = `Write a ${dur} vertical video script (Reels/Shorts) in **${lang}**. Topic: ${topic}. Category: ${cat}. Structure: Hook, Body, CTA.`;
+        const prompt = `Write a ${dur} vertical video script (Reels/Shorts).
+        STRICT INSTRUCTION: Write the script content in **${lang}** (Native Script).
+        Topic: ${topic}. Category: ${cat}. Structure: Hook, Body, CTA.`;
 
         const res = await callGemini(prompt);
         document.getElementById('miniLoader').style.display = 'none';
@@ -630,7 +613,9 @@
         if(!topic) return alert("Enter title!");
         document.getElementById('ytLoader').style.display = 'block';
 
-        const prompt = `Write a ${dur} YouTube video script in **${lang}**. Title: ${topic}. Category: ${cat}. Include Intro, Hook, Content, Outro.`;
+        const prompt = `Write a ${dur} YouTube video script.
+        STRICT INSTRUCTION: Write the script content in **${lang}** (Native Script).
+        Title: ${topic}. Category: ${cat}. Include Intro, Hook, Content, Outro.`;
 
         const res = await callGemini(prompt);
         document.getElementById('ytLoader').style.display = 'none';
