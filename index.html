@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXGN Script Writer Pro v17.0</title>
+    <title>NEXGN Script Writer Pro v18.0</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 font-weight=%22bold%22 fill=%22%23d4af37%22>N</text></svg>">
 
     <style>
@@ -88,7 +88,7 @@
             color: #ffd700; /* Yellow text */
             font-style: italic;
             font-size: 13px;
-            animation: fade 10s infinite; /* 10s per testimonial */
+            animation: fade 10s infinite; 
         }
         @keyframes fade { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 
@@ -114,35 +114,33 @@
         .tab-btn.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
         .tab-btn:hover { background: #222; color: #fff; }
 
-        .tab-content { display: none; padding: 10px; flex-grow: 1; overflow-y: auto; z-index: 1; position: relative; display: flex; flex-direction: column; height: 100%;}
+        .tab-content { display: none; padding: 10px; flex-grow: 1; overflow-y: auto; z-index: 1; position: relative; }
         .tab-content.active { display: block; }
 
         /* Inputs */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .full-width { grid-column: span 3; }
-        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; }
-        
-        .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; margin-top: 10px; margin-bottom: 15px; }
-        
-        /* STATIC TOOLBAR */
+        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
+
+        .action-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; margin-top: 10px; transition: 0.2s; }
+        .action-btn:hover { filter: brightness(1.1); }
+
+        /* TOOLBAR (NON-STATIC) */
         .toolbar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 10px; background: #1a1a1a; border: 1px solid var(--border);
-            border-bottom: none; border-radius: 8px 8px 0 0; position: sticky; top: 0; z-index: 10;
+            display: flex; justify-content: flex-end; align-items: center; 
+            margin-top: 15px; margin-bottom: 5px; gap: 8px; 
+            padding-bottom: 5px; border-bottom: 1px solid #222;
         }
-        .history-select { background: #000; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 250px; }
+        .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 250px; }
         .sm-btn { background: #333; color: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #555; font-size: 12px; }
+        .sm-btn:hover { background: #555; }
         .del-btn { background: #b00020; border-color: #790000; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 
-        /* Output Box */
-        .output-box { 
-            background: #000; border: 1px solid var(--border); padding: 25px; 
-            border-radius: 0 0 8px 8px; min-height: 300px; 
-            white-space: pre-wrap; font-family: 'Courier New', monospace; 
-            color: #ccc; font-size: 15px; line-height: 1.6; 
-        }
-        .loader { display: none; text-align: center; color: var(--primary); margin-top: 10px; font-weight: bold; animation: pulse 1s infinite; }
+        .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 0px; min-height: 250px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
+        
+        .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; animation: pulse 1s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
         /* Modal */
@@ -154,11 +152,11 @@
 
 <div id="login-wrapper">
     <div class="login-box">
-        <h2>NEXGN SCRIPT WRITER PRO v17.0 <span class="reel-icon">🎞️</span></h2>
+        <h2>NEXGN SCRIPT WRITER PRO v18.0 <span class="reel-icon">🎞️</span></h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
-        <div id="loginError" style="color:var(--error); margin-top:10px;"></div>
+        <div id="loginError" style="color:var(--error); margin-top:10px; font-size:12px;"></div>
     </div>
 </div>
 
@@ -258,7 +256,7 @@
         <div id="cineLoader" class="loader">PLANNING SHOTS...</div>
         
         <div class="toolbar">
-            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent Scripts</option></select>
+            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('cine')">❌</button>
             <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
@@ -274,9 +272,8 @@
         </div>
         <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
         <div id="diaLoader" class="loader">WRITING...</div>
-        
         <div class="toolbar">
-            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent Scripts</option></select>
+            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
             <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
@@ -298,9 +295,8 @@
         </div>
         <button class="action-btn" onclick="improveScript()">IMPROVE & TRANSLATE</button>
         <div id="improveLoader" class="loader">POLISHING...</div>
-        
         <div class="toolbar">
-            <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent Scripts</option></select>
+            <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('imp')">❌</button>
             <button class="sm-btn" onclick="clearArea('improveOutput', 'improveInput')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('improveOutput')">🖨️ Print</button>
@@ -325,7 +321,7 @@
         <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
         <div id="ytLoader" class="loader">WRITING...</div>
         <div class="toolbar">
-            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option value="">🕒 Recent Scripts</option></select>
+            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option value="">🕒 Recent</option></select>
             <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
             <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
             <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
@@ -421,10 +417,10 @@
         const key = localStorage.getItem('nisff_key');
         if(key) document.getElementById('apiKey').value = key;
         
-        // Defaults
         document.getElementById('filmLanguage').value = "English";
         document.getElementById('diaLanguage').value = "English";
         document.getElementById('cineLanguage').value = "English";
+        document.getElementById('miniLanguage').value = "English";
         document.getElementById('ytLanguage').value = "English";
         document.getElementById('improveLang').value = "English";
 
@@ -487,7 +483,6 @@
 
     function saveNewPassword() {
         const newPass = document.getElementById('newPassInput').value;
-        if (!newPass) return alert("Enter password");
         let users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
         const idx = users.findIndex(u => u.u === currentUser);
         if (idx !== -1) {
@@ -577,6 +572,7 @@
         } catch (e) { alert("Error: " + e.message); return null; }
     }
 
+    // --- HISTORY ---
     function getHistoryKey(category) { return `nisff_hist_${currentUser}_${category}`; }
     
     function addToHistory(category, text) {
@@ -628,14 +624,7 @@
     function getStrictInstruction(lang) {
         if(lang === 'English') return "Write entirely in English.";
         if(lang === 'Hinglish') return "Write in Hinglish (Hindi words written in English alphabet).";
-        
-        return `
-        STRICT LANGUAGE ENFORCEMENT:
-        1. **Write ONLY in ${lang}**.
-        2. Use the **Native ${lang} Script** (e.g., Assamese script for Assamese).
-        3. Do NOT write dialogue in English unless absolutely necessary.
-        4. No HTML tags.
-        `;
+        return `STRICT LANGUAGE RULE: Output MUST be in **${lang}** using **Native ${lang} Script**. NO English translations.`;
     }
 
     async function generateFilm() {
@@ -670,7 +659,6 @@
 
     async function autoGenerateCinematography(idea, genre, lang) {
         const btn = document.getElementById('btn-cinematography');
-        // Strict inheritance: Uses the film's language
         const res = await callGemini(`Create a Shot List for film "${idea}" (${genre}). ${getStrictInstruction(lang)}`);
         if(res) {
             document.getElementById('cineOutput').innerText = res;
@@ -692,7 +680,7 @@
         const ctx = document.getElementById('cineContext').value;
         const lang = document.getElementById('cineLanguage').value;
         document.getElementById('cineLoader').style.display = 'block';
-        const res = await callGemini(`Create Shot List/Cinematography for: ${ctx}. ${getStrictInstruction(lang)}`);
+        const res = await callGemini(`Create Shot List for: ${ctx}. ${getStrictInstruction(lang)}`);
         document.getElementById('cineLoader').style.display = 'none';
         if(res) { document.getElementById('cineOutput').innerText = res; addToHistory('cine', res); }
     }
@@ -703,7 +691,7 @@
         const lang = document.getElementById('improveLang').value;
         if(!input) return alert("Paste script first");
         document.getElementById('improveLoader').style.display = 'block';
-        const res = await callGemini(`Improve this script based on: ${type}. Rewrite in **${lang}** (Native Script). \n\n${input}`);
+        const res = await callGemini(`Improve this script: ${type}. Rewrite in **${lang}** (Native Script). \n\n${input}`);
         document.getElementById('improveLoader').style.display = 'none';
         if(res) { document.getElementById('improveOutput').innerText = res; addToHistory('imp', res); }
     }
