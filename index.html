@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXGN Script Writer Pro v18.0</title>
+    <title>NISFF | NEXGN International Short Film Festival</title>
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 font-weight=%22bold%22 fill=%22%23d4af37%22>N</text></svg>">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
@@ -17,145 +21,270 @@
             --error: #ff5252;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; }
-        .hidden { display: none !important; }
-        button { cursor: pointer; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+        body.app-active { overflow: hidden; }
 
-        /* Animations */
+        .hidden { display: none !important; }
+        
+        /* LANDING PAGE UTILS */
+        .text-gold { color: var(--primary); }
+        .gold-gradient-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        /* --- FIXED NAVIGATION LINKS --- */
+        .nav-link { 
+            font-size: 13px; 
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            color: #ffffff !important; /* FORCED WHITE */
+            transition: all 0.3s ease-in-out; 
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+        .nav-link:hover { 
+            color: #d4af37 !important; /* GOLD ON HOVER */
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.8); 
+        }
+
+        /* APP DASHBOARD STYLES */
+        #app-main { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
+            background: var(--bg); z-index: 9999; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .reel-icon { display: inline-block; font-size: 24px; margin-left: 10px; animation: spin 4s linear infinite; vertical-align: middle; }
         
-        /* Blinking Red/Green Indicator */
-        @keyframes flashRedGreen { 
-            0% { background-color: var(--success); box-shadow: 0 0 10px var(--success); } 
-            50% { background-color: var(--error); box-shadow: 0 0 10px var(--error); } 
-            100% { background-color: var(--success); box-shadow: 0 0 10px var(--success); } 
-        }
-        .has-data::after {
-            content: ''; position: absolute; top: 8px; left: 8px;
-            width: 10px; height: 10px; border-radius: 50%;
-            animation: flashRedGreen 1s infinite;
-        }
-
-        /* Login Screen */
-        #login-wrapper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #222 0%, #000 70%); z-index: 1000;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .login-box {
-            background: var(--card); padding: 40px; border-radius: 12px;
-            border: 1px solid var(--primary); text-align: center; width: 400px;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
-        }
-        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
-        .login-btn { width: 100%; padding: 12px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; transition: 0.3s; }
-        .login-btn:hover { background: #fff; }
-
-        /* Dashboard */
-        .app-shell { max-width: 1200px; margin: 20px auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; height: 90vh; display: flex; flex-direction: column; position: relative; }
+        /* Dashboard Header */
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); background: #000; }
         
-        /* NEXGN Watermark */
-        .nexgn-watermark {
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 150px; font-weight: 900;
-            color: rgba(255, 255, 255, 0.03);
-            pointer-events: none; z-index: 0;
-            letter-spacing: 10px; user-select: none;
-        }
-
-        .header { 
-            text-align: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); 
-            margin-bottom: 15px; z-index: 2; position: relative; 
-        }
-        
-        .title-row { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
-        h1 { margin: 0; font-size: 24px; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* Testimonial Box */
-        .testimonial-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #333;
-            border-radius: 20px;
-            padding: 8px 20px;
-            display: inline-block;
-            margin-top: 5px;
-            min-width: 400px;
-            max-width: 600px;
-        }
-        .testimonial-text {
-            color: #ffd700; /* Yellow text */
-            font-style: italic;
-            font-size: 13px;
-            animation: fade 10s infinite; 
-        }
-        @keyframes fade { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
-
-        .user-controls { position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 15px; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer; }
-        
-        /* Profile Menu */
-        #profile-menu {
-            position: absolute; top: 60px; right: 0; background: #1a1a1a;
-            border: 1px solid var(--primary); border-radius: 8px; width: 250px;
-            padding: 15px; display: none; z-index: 9999; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.9);
-        }
-        #profile-menu h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 14px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        #profile-menu button { width: 100%; padding: 10px; text-align: left; background: transparent; border: none; color: #fff; border-bottom: 1px solid #333; cursor: pointer; }
-        #profile-menu button:hover { background: #333; }
-        .key-section { margin-bottom: 10px; }
-        .key-input { width: 100%; background: #000; border: 1px solid #444; color: var(--success); padding: 8px; border-radius: 4px; font-family: monospace; box-sizing: border-box; }
-
-        /* Tabs */
-        .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; z-index: 1; position: relative; }
-        .tab-btn { flex: 1; padding: 12px; background: #111; border: 1px solid #333; color: #888; border-radius: 6px; transition: 0.3s; position: relative; }
+        /* App UI Components */
+        .app-body { max-width: 1200px; margin: 20px auto; width: 100%; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn { flex: 1; padding: 12px; background: #111; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; transition: 0.3s; min-width: 120px; }
         .tab-btn.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
-        .tab-btn:hover { background: #222; color: #fff; }
-
-        .tab-content { display: none; padding: 10px; flex-grow: 1; overflow-y: auto; z-index: 1; position: relative; }
+        
+        .tab-content { display: none; flex-grow: 1; overflow-y: auto; padding-bottom: 50px; }
         .tab-content.active { display: block; }
 
-        /* Inputs */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .full-width { grid-column: span 3; }
-        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        .app-input { width: 100%; background: #222; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; }
+        .app-label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
 
-        /* Buttons & Limits */
-        .action-container { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-        .action-btn { flex: 1; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; font-size: 16px; transition: 0.2s; }
-        .action-btn:hover { filter: brightness(1.1); }
-        .limit-badge { color: #888; font-size: 12px; font-weight: bold; white-space: nowrap; background: #111; padding: 5px 10px; border-radius: 4px; border: 1px solid #333; }
+        .gen-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .gen-btn:hover { background: #fff; }
 
-        /* Toolbar */
-        .toolbar { 
-            display: flex; justify-content: flex-end; align-items: center; 
-            margin-top: 15px; margin-bottom: 5px; gap: 8px; 
-            padding-bottom: 5px; border-bottom: 1px solid #222;
-        }
+        .toolbar { display: flex; justify-content: flex-end; align-items: center; margin-top: 15px; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .sm-btn { background: #333; color: #fff; padding: 6px 12px; border-radius: 4px; border: 1px solid #555; font-size: 12px; cursor: pointer; }
+        .del-btn { background: #b00020; border-color: #790000; color: white; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
         .history-select { background: #111; color: #aaa; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 12px; width: 250px; }
-        .sm-btn { background: #333; color: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #555; font-size: 12px; }
-        .sm-btn:hover { background: #555; }
-        .del-btn { background: #b00020; border-color: #790000; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-
-        .output-box { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-top: 0px; min-height: 250px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: #ccc; }
         
-        .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; animation: pulse 1s infinite; }
-        @keyframes pulse { 50% { opacity: 0.5; } }
+        .output-box { background: #000; border: 1px solid var(--border); padding: 25px; border-radius: 0 0 8px 8px; min-height: 300px; white-space: pre-wrap; font-family: 'Courier New', monospace; color: #ccc; font-size: 15px; line-height: 1.6; }
+        .loader { display: none; text-align: center; color: var(--primary); margin-top: 15px; font-weight: bold; }
 
-        /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: none; align-items: center; justify-content: center; }
-        .modal-box { background: #1a1a1a; padding: 30px; border-radius: 10px; width: 300px; text-align: center; border: 1px solid var(--primary); }
+        /* Profile & Modals */
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; }
+        #profile-menu { position: absolute; top: 60px; right: 20px; background: #1a1a1a; border: 1px solid var(--primary); padding: 15px; display: none; z-index: 6000; width: 250px; border-radius: 8px; }
+        #profile-menu button { display: block; width: 100%; text-align: left; padding: 10px; background: transparent; border: none; color: #fff; border-bottom: 1px solid #333; cursor: pointer; }
+        .key-input { width: 100%; background: #000; border: 1px solid #444; padding: 8px; color: var(--success); margin-bottom: 10px; border-radius: 4px; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; }
+        .modal-box { background: #1a1a1a; padding: 30px; border-radius: 10px; width: 350px; text-align: center; border: 1px solid var(--primary); }
+
+        /* Blinking Indicator */
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .has-data::after { content: ''; position: absolute; top: 8px; left: 8px; width: 10px; height: 10px; background-color: var(--success); border-radius: 50%; animation: blink 1.2s infinite; box-shadow: 0 0 5px var(--success); }
     </style>
 </head>
-<body>
+<body class="bg-black text-gray-100 antialiased">
 
-<div id="login-wrapper">
+<div id="landing-page" class="w-full">
+    
+    <nav class="bg-black border-b border-[#d4af37]/50 fixed top-0 w-full z-[9999] shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between h-auto md:h-20 items-center py-4 md:py-0">
+                
+                <div class="text-3xl font-extrabold tracking-widest text-[#d4af37] cursor-pointer mb-4 md:mb-0">NISFF</div>
+                
+                <div class="flex flex-wrap justify-center md:justify-end gap-6 items-center">
+                    <a href="https://nisff.co.in" class="nav-link">HOME</a>
+                    <a href="https://nisff.co.in/gala.html" class="nav-link">GALA</a>
+                    <a href="https://nisff.co.in/awards.html" class="nav-link">AWARDS</a>
+                    <a href="https://nisff.co.in/gallery.html" class="nav-link">GALLERY</a>
+                    <a href="https://nisff.co.in/testimonials.html" class="nav-link">TESTIMONIALS</a>
+                    <a href="https://nisff.co.in/winners.html" class="nav-link">WINNERS</a>
+                    <a href="https://nisff.co.in/rules.html" class="nav-link">RULES</a>
+                    
+                    <a href="https://nisff.co.in/submit.html" style="color:black !important;" class="bg-[#d4af37] px-5 py-2 rounded-full font-bold text-xs tracking-widest hover:bg-white transition shadow-[0_0_15px_rgba(212,175,55,0.5)] text-black">
+                        SUBMIT
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="relative bg-[url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center min-h-[100vh] pt-32">
+        <div class="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-black/60"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center gap-12 h-full justify-center mt-10">
+            <div class="md:w-1/2 text-center md:text-left mt-10 md:mt-0">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
+                    THE NEXT GEN <br>
+                    <span class="gold-gradient-text">STORYTELLING</span>
+                </h1>
+                <p class="text-gray-400 text-lg mb-8 max-w-lg mx-auto md:mx-0">
+                    Welcome to the <strong>NEXGN International Short Film Festival</strong>. 
+                    Celebrating cinema, innovation, and the voices of tomorrow. 
+                </p>
+                <button onclick="showLogin()" class="bg-[#d4af37] text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-white transition shadow-[0_0_20px_rgba(212,175,55,0.4)]">
+                    Access Script Writer Pro
+                </button>
+            </div>
+
+            <div class="md:w-1/2 w-full max-w-sm">
+                <div class="bg-black/80 backdrop-blur-md border border-[#d4af37] rounded-2xl p-8 shadow-[0_0_40px_rgba(212,175,55,0.15)]">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-[#d4af37] flex items-center justify-center gap-2">
+                            CREATOR PORTAL <span class="reel-icon">🎞️</span>
+                        </h2>
+                        <p class="text-gray-500 text-xs mt-1">NISFF SCRIPT WRITER PRO v26.0</p>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="text" id="loginUser" class="w-full bg-[#111] border border-gray-700 rounded-lg p-3 text-white focus:border-[#d4af37] focus:outline-none" placeholder="Username">
+                        <input type="password" id="loginPass" class="w-full bg-[#111] border border-gray-700 rounded-lg p-3 text-white focus:border-[#d4af37] focus:outline-none" placeholder="Password">
+                        <button onclick="handleLogin()" class="w-full bg-[#d4af37] hover:bg-white text-black font-bold py-3 rounded-lg transition duration-300">LOGIN</button>
+                        <div id="loginError" class="text-red-500 text-center text-sm font-bold h-5"></div>
+                    </div>
+                    <div class="text-center mt-6">
+                        <span ondblclick="toggleAdminPanel()" class="text-gray-800 text-xs cursor-default select-none">Admin Access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-black py-20 border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-center text-3xl font-bold text-[#d4af37] mb-12">FESTIVAL HIGHLIGHTS</h2>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="p-6 border border-gray-800 rounded-xl hover:border-[#d4af37] transition group">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition">🏆</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Prestigious Awards</h3>
+                    <p class="text-gray-500 text-sm">Best Short, Best Director, Best Screenplay, and Audience Choice Awards.</p>
+                </div>
+                <div class="p-6 border border-gray-800 rounded-xl hover:border-[#d4af37] transition group">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition">🌍</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Global Exposure</h3>
+                    <p class="text-gray-500 text-sm">Showcasing films from over 50 countries with international jury members.</p>
+                </div>
+                <div class="p-6 border border-gray-800 rounded-xl hover:border-[#d4af37] transition group">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition">🎥</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Networking</h3>
+                    <p class="text-gray-500 text-sm">Connect with producers, distributors, and fellow creators.</p>
+                </div>
+                <div class="p-6 border border-gray-800 rounded-xl hover:border-[#d4af37] transition group">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition">🎓</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Workshops</h3>
+                    <p class="text-gray-500 text-sm">Learn from industry masters in scriptwriting and direction.</p>
+                </div>
+                <div class="p-6 border border-gray-800 rounded-xl hover:border-[#d4af37] transition group">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition">🎬</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Live Screenings</h3>
+                    <p class="text-gray-500 text-sm">Experience cinema on the big screen with live audiences.</p>
+                </div>
+                <div class="p-6 border border-gray-800 rounded-xl hover:border-[#d4af37] transition group">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition">📰</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Media Coverage</h3>
+                    <p class="text-gray-500 text-sm">Get featured in top film magazines and press releases.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#050505] py-20 border-t border-gray-900">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold text-white mb-6">ABOUT <span class="text-[#d4af37]">NISFF</span></h2>
+            <p class="text-gray-400 text-lg leading-relaxed mb-6">
+                The NEXGN International Short Film Festival is dedicated to discovering and nurturing the next generation of filmmakers. We believe that short films are a unique art form that deserves a global stage.
+            </p>
+            <p class="text-gray-400 text-lg leading-relaxed">
+                Since our inception, we have screened over 2,000 films and awarded over $50,000 in prizes and production grants. Our mission is to bridge the gap between independent creators and the mainstream industry.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-black py-20 border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-center text-3xl font-bold text-[#d4af37] mb-12">WHAT FILMMAKERS SAY</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-[#111] p-6 rounded-lg border border-gray-800"><p class="text-gray-300 italic">"An incredible experience. The networking opportunities were unmatched."</p><p class="text-[#d4af37] mt-4 font-bold">- Sarah J., Director</p></div>
+                <div class="bg-[#111] p-6 rounded-lg border border-gray-800"><p class="text-gray-300 italic">"The Script Writer Pro tool helped me finalize my screenplay in days!"</p><p class="text-[#d4af37] mt-4 font-bold">- Rahul V., Writer</p></div>
+                <div class="bg-[#111] p-6 rounded-lg border border-gray-800"><p class="text-gray-300 italic">"Very well organized and professional. Can't wait for next year."</p><p class="text-[#d4af37] mt-4 font-bold">- David L., Producer</p></div>
+                <div class="bg-[#111] p-6 rounded-lg border border-gray-800"><p class="text-gray-300 italic">"Winning Best Short at NISFF opened so many doors for me."</p><p class="text-[#d4af37] mt-4 font-bold">- Anjali M., Filmmaker</p></div>
+                <div class="bg-[#111] p-6 rounded-lg border border-gray-800"><p class="text-gray-300 italic">"A festival that truly cares about independent cinema."</p><p class="text-[#d4af37] mt-4 font-bold">- Carlos R., Editor</p></div>
+                <div class="bg-[#111] p-6 rounded-lg border border-gray-800"><p class="text-gray-300 italic">"The workshops provided practical knowledge I use every day."</p><p class="text-[#d4af37] mt-4 font-bold">- Emily W., Student</p></div>
+            </div>
+            <div class="text-center mt-10">
+                <a href="https://nisff.co.in/testimonials.html" class="inline-block border border-gray-600 text-gray-300 px-6 py-2 rounded hover:border-[#d4af37] hover:text-[#d4af37] transition">View All Testimonials</a>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-black border-t-2 border-[#d4af37]/30 pt-16 pb-8 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-12">
+            <div>
+                <h3 class="text-3xl font-extrabold text-[#d4af37] tracking-widest mb-4">NISFF</h3>
+                <p class="text-sm mb-6">Empowering global storytellers through innovation and opportunity. Join the revolution of short film cinema.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-white hover:text-[#d4af37] text-xl transition"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-white hover:text-[#d4af37] text-xl transition"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white hover:text-[#d4af37] text-xl transition"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-white hover:text-[#d4af37] text-xl transition"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold uppercase tracking-wider mb-6 border-b border-gray-800 pb-2">Navigate</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="https://nisff.co.in" class="hover:text-[#d4af37] transition">HOME</a></li>
+                    <li><a href="https://nisff.co.in/gala.html" class="hover:text-[#d4af37] transition">GALA INFO</a></li>
+                    <li><a href="https://nisff.co.in/awards.html" class="hover:text-[#d4af37] transition">AWARDS</a></li>
+                    <li><a href="https://nisff.co.in/gallery.html" class="hover:text-[#d4af37] transition">GALLERY</a></li>
+                    <li><a href="https://nisff.co.in/testimonials.html" class="hover:text-[#d4af37] transition">TESTIMONIALS</a></li>
+                    <li><a href="https://nisff.co.in/winners.html" class="hover:text-[#d4af37] transition">WINNERS LIST</a></li>
+                    <li><a href="https://nisff.co.in/rules.html" class="hover:text-[#d4af37] transition">RULES</a></li>
+                    <li><a href="https://nisff.co.in/submit.html" class="hover:text-[#d4af37] transition font-bold text-[#d4af37]">SUBMIT FILM</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold uppercase tracking-wider mb-6 border-b border-gray-800 pb-2">Customer Care</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="https://nisff.co.in/privacy.html" class="hover:text-[#d4af37] transition">Privacy Policy</a></li>
+                    <li><a href="https://nisff.co.in/rnc_policy.html" class="hover:text-[#d4af37] transition">Refund & Cancellation</a></li>
+                    <li><a href="https://nisff.co.in/tnc.html" class="hover:text-[#d4af37] transition">Terms & Conditions</a></li>
+                    <li><a href="https://nisff.co.in/disclaimer.html" class="hover:text-[#d4af37] transition">Disclaimer</a></li>
+                    <li><a href="https://nisff.co.in/faq.html" class="hover:text-[#d4af37] transition">FAQ</a></li>
+                    <li><a href="https://nisff.co.in/contact.html" class="hover:text-[#d4af37] transition">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center mt-12 pt-8 border-t border-gray-900 text-xs">
+            <p>&copy; 2024 NEXGN International Short Film Festival. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+
+<div id="login-wrapper" class="hidden">
+    <div class="close-login" style="position:absolute; top:20px; right:30px; color:#fff; font-size:30px; cursor:pointer;" onclick="hideLogin()">&times;</div>
     <div class="login-box">
-        <h2>NEXGN SCRIPT WRITER PRO v18.0 <span class="reel-icon">🎞️</span></h2>
+        <h2 style="color:var(--primary); margin-bottom:20px; font-size:20px; display:flex; justify-content:center; align-items:center;">
+            NEXGN SCRIPT WRITER PRO v26.0 <span class="reel-icon">🎞️</span>
+        </h2>
         <input type="text" id="loginUser" class="login-input" placeholder="Username">
         <input type="password" id="loginPass" class="login-input" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
@@ -163,368 +292,235 @@
     </div>
 </div>
 
-<div class="app-shell hidden" id="app-main">
-    <div class="nexgn-watermark">NEXGN</div>
-    
-    <div class="header">
-        <div style="flex-grow:1; text-align: center;">
-            <div class="title-row">
-                <h1>NEXGN Script Writer Pro <span class="reel-icon">🎞️</span></h1>
+<div id="app-main" class="hidden">
+    <div class="app-header">
+        <div class="flex items-center gap-4">
+            <div class="app-title" style="color:#d4af37; font-weight:bold; font-size:24px;">
+                NEXGN Script Writer Pro <span class="reel-icon">🎞️</span>
             </div>
             <div class="testimonial-box">
                 <div id="testimonialText" class="testimonial-text">"NEXGN Script Writer changed my filmmaking career!" - Rohan K.</div>
             </div>
         </div>
-
+        
         <div class="user-controls">
+            <span id="welcomeUser" style="color:#666; font-size:12px;"></span>
             <img id="userAvatarDisplay" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="user-avatar" onclick="toggleProfileMenu()">
+            
             <div id="profile-menu">
-                <h4>Profile & Settings</h4>
+                <h4>SETTINGS</h4>
                 <div class="key-section">
-                    <label>Insert key here</label>
-                    <input type="password" id="apiKey" class="key-input" placeholder="Enter API Key" onchange="saveKey()">
+                    <label style="color:#888; font-size:10px;">Insert Key Here</label>
+                    <input type="password" id="apiKey" class="key-input" onchange="saveKey()">
                 </div>
-                <button onclick="openPhotoModal()">📷 Change Photo</button>
+                <button onclick="openPhotoModal()">📷 Update Photo</button>
                 <button onclick="openPassModal()">🔑 Change Password</button>
                 <button onclick="logout()" style="color:var(--error)">🚪 Logout</button>
             </div>
         </div>
     </div>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Scripter</button>
-        <button class="tab-btn" id="btn-cinematography" onclick="openTab('cinematography')">🎥 Cinematography</button>
-        <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
-        <button class="tab-btn" onclick="openTab('improve')">✨ Script Improvement</button>
-        <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Scripter</button>
-    </div>
+    <div class="app-body">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="openTab('film')">🎬 Short Film Scripter</button>
+            <button class="tab-btn" id="btn-cinematography" onclick="openTab('cinematography')">🎥 Cinematography</button>
+            <button class="tab-btn" id="btn-dialogue" onclick="openTab('dialogue')">🗣️ Dialogue Writer</button>
+            <button class="tab-btn" onclick="openTab('improve')">✨ Script Improvement</button>
+            <button class="tab-btn" onclick="openTab('youtube')">📹 YouTube Scripter</button>
+        </div>
 
-    <datalist id="languageOptions">
-        <option value="English">English</option>
-        <option value="Hinglish">Hinglish</option>
-        <option value="Hindi">Hindi (हिन्दी)</option>
-        <option value="Marathi">Marathi (मराठी)</option>
-        <option value="Bengali">Bengali (বাংলা)</option>
-        <option value="Tamil">Tamil (தமிழ்)</option>
-        <option value="Telugu">Telugu (తెలుగు)</option>
-        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-        <option value="Urdu">Urdu (اردو)</option>
-        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-        <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
-        <option value="Malayalam">Malayalam (മലയാളം)</option>
-        <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-        <option value="Assamese">Assamese (অসমীয়া)</option>
-        <option value="Maithili">Maithili (मैथिली)</option>
-        <option value="Santali">Santali (संथाली)</option>
-        <option value="Kashmiri">Kashmiri (कश्मीरी)</option>
-        <option value="Nepali">Nepali (नेपाली)</option>
-        <option value="Konkani">Konkani (कोंकणी)</option>
-        <option value="Sindhi">Sindhi (सिंधी)</option>
-        <option value="Dogri">Dogri (डोगरी)</option>
-        <option value="Manipuri">Manipuri (মণিপুরী)</option>
-        <option value="Bodo">Bodo (बर')</option>
-        <option value="Sanskrit">Sanskrit (संस्कृत)</option>
-    </datalist>
+        <datalist id="languageOptions">
+            <option value="English">English</option><option value="Hinglish">Hinglish</option><option value="Hindi">Hindi (हिन्दी)</option>
+            <option value="Marathi">Marathi (मराठी)</option><option value="Bengali">Bengali (বাংলা)</option><option value="Tamil">Tamil (தமிழ்)</option>
+            <option value="Telugu">Telugu (తెలుగు)</option><option value="Gujarati">Gujarati (ગુજરાતી)</option><option value="Urdu">Urdu (اردو)</option>
+            <option value="Kannada">Kannada (ಕನ್ನಡ)</option><option value="Odia">Odia (ଓଡ଼ିଆ)</option><option value="Malayalam">Malayalam (മലയാളം)</option>
+            <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option><option value="Assamese">Assamese (অসমীয়া)</option><option value="Maithili">Maithili (मैथिली)</option>
+            <option value="Santali">Santali (संथाली)</option><option value="Kashmiri">Kashmiri (कश्मीरी)</option><option value="Nepali">Nepali (नेपाली)</option>
+            <option value="Konkani">Konkani (कोंकणी)</option><option value="Sindhi">Sindhi (सिंधी)</option><option value="Dogri">Dogri (डोगरी)</option>
+            <option value="Manipuri">Manipuri (মণিপুরী)</option><option value="Bodo">Bodo (बर')</option><option value="Sanskrit">Sanskrit (संस्कृत)</option>
+        </datalist>
 
-    <div id="film" class="tab-content active">
-        <div class="input-grid">
-            <div class="full-width"><label>Movie Idea</label><textarea id="filmIdea" rows="2" placeholder="e.g. A young boy finds a magical flute..."></textarea></div>
-            <div><label>Genre</label><select id="filmGenre">
-                <option>Drama</option><option>Sci-Fi</option><option>Horror</option><option>Comedy</option><option>Thriller</option><option>Romance</option>
-                <option>Action</option><option>Animation</option><option>Fantasy</option><option>Mystery</option><option>Historical</option><option>Noir</option>
-            </select></div>
-            <div><label>Duration</label><select id="filmDuration"><option>10 Minutes</option><option>15 Minutes</option><option>20 Minutes</option><option>25 Minutes</option><option>30 Minutes</option><option>35 Minutes</option><option>40 Minutes</option></select></div>
-            <div><label>Language</label><input list="languageOptions" id="filmLanguage" placeholder="Select Language"></div>
+        <div id="film" class="tab-content active">
+            <div class="input-grid">
+                <div class="full-width"><span class="app-label">Idea</span><textarea id="filmIdea" class="app-input" rows="2"></textarea></div>
+                <div><span class="app-label">Genre</span><select id="filmGenre" class="app-input"><option>Drama</option><option>Thriller</option><option>Comedy</option><option>Horror</option><option>Sci-Fi</option><option>Romance</option></select></div>
+                <div><span class="app-label">Duration</span><select id="filmDuration" class="app-input"><option>10 Mins</option><option>15 Mins</option><option>20 Mins</option><option>30 Mins</option></select></div>
+                <div><span class="app-label">Language</span><input list="languageOptions" id="filmLanguage" class="app-input" placeholder="Select"></div>
+            </div>
+            <button class="gen-btn" onclick="generateFilm()">GENERATE SCRIPT + AUTO CINEMATOGRAPHY</button>
+            <div id="filmLoader" class="loader">WRITING...</div>
+            <div class="toolbar">
+                <select id="hist-film" class="history-select" onchange="restoreHistory('film')"><option value="">Recent Scripts</option></select>
+                <button class="del-btn" onclick="deleteHistoryItem('film')">X</button>
+                <button class="sm-btn" onclick="clearArea('filmOutput', 'filmIdea')">Clear</button>
+                <button class="sm-btn" onclick="printArea('filmOutput')">Print</button>
+                <button class="sm-btn" onclick="copyText('filmOutput')">Copy</button>
+            </div>
+            <div id="filmOutput" class="output-box"></div>
         </div>
-        <div class="action-container">
-            <button class="action-btn" onclick="generateFilm()">GENERATE SCRIPT + AUTO CINEMATOGRAPHY</button>
-            <span class="limit-badge" id="limit-film">Checking...</span>
-        </div>
-        <div id="filmLoader" class="loader">WRITING SCREENPLAY...</div>
-        <div class="toolbar">
-            <select id="hist-film" class="history-select" onchange="restoreHistory('film')"><option value="">🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('film')">❌</button>
-            <button class="sm-btn" onclick="clearArea('filmOutput', 'filmIdea')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('filmOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('filmOutput')">📋 Copy</button>
-        </div>
-        <div id="filmOutput" class="output-box"></div>
-    </div>
 
-    <div id="cinematography" class="tab-content">
-        <div class="input-grid">
-            <div class="full-width"><label>Script Context</label><textarea id="cineContext" rows="3"></textarea></div>
-            <div><label>Language</label><input list="languageOptions" id="cineLanguage"></div>
+        <div id="cinematography" class="tab-content">
+            <div class="input-grid">
+                <div class="full-width"><span class="app-label">Context</span><textarea id="cineContext" class="app-input" rows="3"></textarea></div>
+                <div><span class="app-label">Language</span><input list="languageOptions" id="cineLanguage" class="app-input"></div>
+            </div>
+            <button class="gen-btn" onclick="generateCinematography()">GENERATE SHOTS</button>
+            <div id="cineLoader" class="loader">PLANNING...</div>
+            <div class="toolbar">
+                <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option>Recent</option></select>
+                <button class="del-btn" onclick="deleteHistoryItem('cine')">X</button>
+                <button class="sm-btn" onclick="printArea('cineOutput')">Print</button>
+            </div>
+            <div id="cineOutput" class="output-box"></div>
         </div>
-        <div class="action-container">
-            <button class="action-btn" onclick="generateCinematography()">GENERATE SHOT LIST</button>
-            <span class="limit-badge" id="limit-cine">Checking...</span>
-        </div>
-        <div id="cineLoader" class="loader">PLANNING SHOTS...</div>
-        <div class="toolbar">
-            <select id="hist-cine" class="history-select" onchange="restoreHistory('cine')"><option value="">🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('cine')">❌</button>
-            <button class="sm-btn" onclick="clearArea('cineOutput', 'cineContext')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('cineOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('cineOutput')">📋 Copy</button>
-        </div>
-        <div id="cineOutput" class="output-box"></div>
-    </div>
 
-    <div id="dialogue" class="tab-content">
-        <div class="input-grid">
-            <div class="full-width"><label>Context</label><textarea id="diaContext" rows="3" placeholder="Context..."></textarea></div>
-            <div><label>Language</label><input list="languageOptions" id="diaLanguage" placeholder="Select Language"></div>
+        <div id="dialogue" class="tab-content">
+            <div class="input-grid">
+                <div class="full-width"><span class="app-label">Context</span><textarea id="diaContext" class="app-input" rows="3"></textarea></div>
+                <div><span class="app-label">Language</span><input list="languageOptions" id="diaLanguage" class="app-input"></div>
+            </div>
+            <button class="gen-btn" onclick="generateDialogue()">GENERATE DIALOGUE</button>
+            <div id="diaLoader" class="loader">WRITING...</div>
+            <div class="toolbar">
+                <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option>Recent</option></select>
+                <button class="del-btn" onclick="deleteHistoryItem('dia')">X</button>
+                <button class="sm-btn" onclick="printArea('diaOutput')">Print</button>
+            </div>
+            <div id="diaOutput" class="output-box"></div>
         </div>
-        <div class="action-container">
-            <button class="action-btn" onclick="generateDialogue()">GENERATE DIALOGUES</button>
-            <span class="limit-badge" id="limit-dia">Checking...</span>
-        </div>
-        <div id="diaLoader" class="loader">WRITING...</div>
-        <div class="toolbar">
-            <select id="hist-dia" class="history-select" onchange="restoreHistory('dia')"><option value="">🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('dia')">❌</button>
-            <button class="sm-btn" onclick="clearArea('diaOutput', 'diaContext')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('diaOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('diaOutput')">📋 Copy</button>
-        </div>
-        <div id="diaOutput" class="output-box"></div>
-    </div>
 
-    <div id="improve" class="tab-content">
-        <div class="input-grid">
-            <div class="full-width"><label>Paste Existing Script</label><textarea id="improveInput" rows="5"></textarea></div>
-            <div><label>Instruction</label><select id="improveType">
-                <option>Fix Grammar & Punctuation</option>
-                <option>Make Dialogues More Emotional</option>
-                <option>Tighten Pacing</option>
-                <option>Format as Professional Screenplay</option>
-            </select></div>
-            <div><label>Target Language</label><input list="languageOptions" id="improveLang" placeholder="Select"></div>
+        <div id="improve" class="tab-content">
+            <div class="input-grid">
+                <div class="full-width"><span class="app-label">Script</span><textarea id="improveInput" class="app-input" rows="5"></textarea></div>
+                <div><span class="app-label">Goal</span><select id="improveType" class="app-input"><option>Fix Grammar</option><option>Format</option><option>Enhance</option></select></div>
+                <div><span class="app-label">Target Lang</span><input list="languageOptions" id="improveLang" class="app-input"></div>
+            </div>
+            <button class="gen-btn" onclick="improveScript()">IMPROVE & TRANSLATE</button>
+            <div id="improveLoader" class="loader">POLISHING...</div>
+            <div class="toolbar">
+                <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option>Recent</option></select>
+                <button class="del-btn" onclick="deleteHistoryItem('imp')">X</button>
+                <button class="sm-btn" onclick="printArea('improveOutput')">Print</button>
+            </div>
+            <div id="improveOutput" class="output-box"></div>
         </div>
-        <div class="action-container">
-            <button class="action-btn" onclick="improveScript()">IMPROVE & TRANSLATE</button>
-            <span class="limit-badge" id="limit-imp">Checking...</span>
-        </div>
-        <div id="improveLoader" class="loader">POLISHING...</div>
-        <div class="toolbar">
-            <select id="hist-imp" class="history-select" onchange="restoreHistory('imp')"><option value="">🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('imp')">❌</button>
-            <button class="sm-btn" onclick="clearArea('improveOutput', 'improveInput')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('improveOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('improveOutput')">📋 Copy</button>
-        </div>
-        <div id="improveOutput" class="output-box"></div>
-    </div>
 
-    <div id="youtube" class="tab-content">
-        <div class="input-grid">
-            <div class="full-width"><label>Title</label><input type="text" id="ytTopic"></div>
-            <div><label>Duration</label><select id="ytDuration"><option>10 Min</option><option>15 Min</option><option>20 Min</option><option>25 Min</option><option>30 Min</option></select></div>
-            <div><label>Category</label><select id="ytCategory">
-                <option>Tech Review</option><option>Vlog</option><option>Documentary</option><option>Gaming</option><option>Tutorial</option>
-                <option>Comedy</option><option>Horror Stories</option><option>Finance</option><option>History</option><option>Science</option>
-                <option>True Crime</option><option>ASMR</option><option>Cooking</option><option>Fitness</option><option>Travel Guide</option>
-                <option>DIY / Crafts</option><option>Productivity</option><option>Meditation</option><option>News / Commentary</option>
-                <option>Movie Review</option><option>Psychology</option>
-            </select></div>
-            <div><label>Language</label><input list="languageOptions" id="ytLanguage"></div>
+        <div id="youtube" class="tab-content">
+            <div class="input-grid">
+                <div class="full-width"><span class="app-label">Title</span><input type="text" id="ytTopic" class="app-input"></div>
+                <div><span class="app-label">Duration</span><select id="ytDuration" class="app-input"><option>10 Mins</option><option>15 Mins</option><option>20 Mins</option><option>30 Mins</option></select></div>
+                <div><span class="app-label">Category</span><select id="ytCategory" class="app-input"><option>Tech</option><option>Vlog</option><option>Docu</option><option>Comedy</option><option>Review</option><option>Gaming</option><option>History</option><option>True Crime</option></select></div>
+                <div><span class="app-label">Language</span><input list="languageOptions" id="ytLanguage" class="app-input"></div>
+            </div>
+            <button class="gen-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
+            <div id="ytLoader" class="loader">WRITING...</div>
+            <div class="toolbar">
+                <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option>Recent</option></select>
+                <button class="del-btn" onclick="deleteHistoryItem('yt')">X</button>
+                <button class="sm-btn" onclick="printArea('ytOutput')">Print</button>
+            </div>
+            <div id="ytOutput" class="output-box"></div>
         </div>
-        <div class="action-container">
-            <button class="action-btn" onclick="generateYouTube()">GENERATE SCRIPT</button>
-            <span class="limit-badge" id="limit-yt">Checking...</span>
-        </div>
-        <div id="ytLoader" class="loader">WRITING...</div>
-        <div class="toolbar">
-            <select id="hist-yt" class="history-select" onchange="restoreHistory('yt')"><option value="">🕒 Recent Scripts</option></select>
-            <button class="del-btn" onclick="deleteHistoryItem('yt')">❌</button>
-            <button class="sm-btn" onclick="clearArea('ytOutput', 'ytTopic')">🗑️ Clear</button>
-            <button class="sm-btn" onclick="printArea('ytOutput')">🖨️ Print</button>
-            <button class="sm-btn" onclick="copyText('ytOutput')">📋 Copy</button>
-        </div>
-        <div id="ytOutput" class="output-box"></div>
-    </div>
-
-</div>
-
-<div id="passModal" class="modal">
-    <div class="modal-box">
-        <h3>Change Password</h3>
-        <input type="password" id="newPassInput" class="login-input" placeholder="New Password">
-        <button class="login-btn" onclick="saveNewPassword()">Save</button>
-        <button class="login-btn" style="background:#333; margin-top:10px;" onclick="closeModals()">Cancel</button>
     </div>
 </div>
 
-<div id="photoModal" class="modal">
-    <div class="modal-box">
-        <h3>Upload Photo</h3>
-        <input type="file" id="photoInput" class="login-input" accept="image/*">
-        <button class="login-btn" onclick="savePhoto()">Upload</button>
-        <button class="login-btn" style="background:#333; margin-top:10px;" onclick="closeModals()">Cancel</button>
-    </div>
-</div>
+<div id="admin-panel" class="modal"><div class="modal-box"><h3>Admin Panel</h3><input id="newUser" class="app-input" placeholder="User"><input id="newPass" class="app-input" style="margin-top:10px" placeholder="Pass"><button class="gen-btn" onclick="createUser()">Create User</button><button class="gen-btn" style="background:#333; margin-top:5px" onclick="toggleAdminPanel()">Close</button></div></div>
+<div id="passModal" class="modal"><div class="modal-box"><h3>New Password</h3><input id="newPassInput" class="app-input" type="password"><button class="gen-btn" onclick="saveNewPassword()">Save</button><button class="gen-btn" style="background:#333" onclick="closeModals()">Cancel</button></div></div>
+<div id="photoModal" class="modal"><div class="modal-box"><h3>Upload Photo</h3><input id="photoInput" type="file" class="app-input"><button class="gen-btn" onclick="savePhoto()">Upload</button><button class="gen-btn" style="background:#333" onclick="closeModals()">Cancel</button></div></div>
 
 <script>
-    let currentUser = null;
+    // --- CONFIG & DATA ---
+    const AUTH = { u: "bmV4Z25sYWJz", p: "SU1sZWdlbmQyNTVA" }; // Admin Base64
     const LIMITS = { film: 3, cine: 3, dia: 10, imp: 5, yt: 3 };
-
-    // --- TESTIMONIALS (50+) ---
+    let currentUser = null;
+    
+    // 50+ Testimonials
     const testimonials = [
-        "NEXGN Script Writer changed my filmmaking career! - Rohan K.",
-        "Best AI tool for dialogue writing. Highly recommended. - Priya S.",
-        "The cinematography shot lists are a game changer. - Amit D.",
-        "Finally, a tool that supports Assamese script perfectly! - Manash B.",
-        "My YouTube workflow is 10x faster now. - TechGuru",
-        "The script formatting is industry standard. Amazing. - Suresh M.",
-        "Hinglish support is exactly what I needed for my web series. - Anjali P.",
-        "Best AI script tool for Indian filmmakers. - Director X",
-        "It handles Marathi dialects surprisingly well. - Vijay T.",
-        "The shot lists are very creative and detailed. - DOP Sarah",
-        "I use this daily for my Instagram Reels. - Influencer123",
-        "The script improvement tab fixed my rough draft instantly. - Writer Joe",
-        "Clean interface, no ads, just pure productivity. - User99",
-        "Love the dark mode and professional look. - Editor Sam",
-        "Supports so many regional languages! A must-have. - Ravi L.",
-        "The Bengali scripts feel very natural. - Dipankar G.",
-        "Great for brainstorming horror concepts. - ScaredyCat",
-        "The documentary structure logic is solid. - DocuMaker",
-        "Highly recommended for student filmmakers. - FilmStudent",
-        "Simple, fast, and effective. - Minimalist",
-        "The Tamil dialogue generation is spot on. - Kartik",
-        "Helped me win a local short film contest! - Winner22",
-        "The auto-save history feature is a lifesaver. - ForgetfulFred",
-        "I love how it separates scenes clearly. - ScriptDoc",
-        "Formatting is perfect for PDF export. - PrintMaster",
-        "The horror prompts give me chills. - GhostHunter",
-        "Comedy scripts actually have good timing. - FunnyBone",
-        "Better than ChatGPT for screenplays. - AI_Fan",
-        "The admin panel security is a nice touch. - SysAdmin",
-        "Works great on my iPad too. - MobileUser",
-        "Punjabi scripts are fantastic! - SinghIsKing",
-        "The duration estimator is quite accurate. - TimeKeeper",
-        "Love the new V18 update! - EarlyAdopter",
-        "Makes pre-production so much smoother. - Producer Pam",
-        "The drone shot suggestions are epic. - SkyHigh",
-        "Urdu poetry scripts come out beautiful. - PoetSoul",
-        "Handles complex sci-fi jargon easily. - SciFiNerd",
-        "The romance scripts are cheesy but good! - LoveGuru",
-        "Action sequences are well described. - StuntMan",
-        "Great for non-English speakers. - GlobalUser",
-        "The formatting follows Hollywood standards. - HW_Dreamer",
-        "Kannada scripts are very authentic. - KarnatakaBoy",
-        "Odia support is rare and appreciated. - OdishaLove",
-        "Fastest way to get a first draft. - SpeedWriter",
-        "The login system keeps my work private. - PrivacyFirst",
-        "Customer support is responsive. - HelpDesk",
-        "Worth every penny (even though it's free!). - FrugalFilmmaker",
-        "The best tool for Indian content creators. - CreatorHub",
-        "I generated 5 scripts in one hour. Insane. - PowerUser",
-        "NEXGN is the future of writing. - Futurist"
+        "Best AI script tool! - Rohan", "Amazing shots. - Amit", "Love the languages. - Priya", "Great for reels. - TechGuru", "So fast! - DirectorX",
+        "Assamese script support is rare! - Manash", "Best investment for creators. - CreatorHub", "Simple and powerful. - Minimalist", "Great for students. - FilmSchool",
+        "The horror scripts are scary! - Ghost", "Comedy timing is good. - FunnyBone", "Documentary outlines are solid. - DocuMaker", "Very fast generation. - Speed",
+        "Secure and private. - PrivacyFirst", "Customer support is great. - HelpDesk", "Love the dark mode. - DarkTheme", "Works on mobile perfectly. - MobileUser",
+        "Marathi dialects are accurate. - Vijay", "Shot lists are detailed. - DOP", "Budget friendly. - IndieFilm", "Script improvement works wonders. - Editor",
+        "Translation is accurate. - Global", "Hinglish support is key. - WebSeries", "Action scenes are vivid. - Stunt", "Romance scripts are sweet. - Love"
     ];
 
     window.onload = () => {
-        const sessionUser = localStorage.getItem('nisff_current_user');
-        if (sessionUser) {
-            currentUser = sessionUser;
-            initApp();
-        }
+        if(localStorage.getItem('nisff_current_user')) { currentUser = localStorage.getItem('nisff_current_user'); showApp(); }
+        if(localStorage.getItem('nisff_key')) document.getElementById('apiKey').value = localStorage.getItem('nisff_key');
         
-        const key = localStorage.getItem('nisff_key');
-        if(key) document.getElementById('apiKey').value = key;
-        
+        // Defaults
         document.getElementById('filmLanguage').value = "English";
-        document.getElementById('diaLanguage').value = "English";
-        document.getElementById('cineLanguage').value = "English";
-        document.getElementById('ytLanguage').value = "English";
         document.getElementById('improveLang').value = "English";
-
+        
         startTestimonials();
+        
+        // Init Admin
+        let users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        if(users.length === 0) { users.push({u: atob(AUTH.u), p: atob(AUTH.p), role:'admin'}); localStorage.setItem('nisff_users', JSON.stringify(users)); }
     };
 
     function startTestimonials() {
-        let i = 0;
-        setInterval(() => {
-            const el = document.getElementById('testimonialText');
-            el.style.animation = 'none';
-            el.offsetHeight; 
-            el.style.animation = 'fade 10s infinite';
-            el.innerText = testimonials[i];
+        let i = 0; setInterval(() => {
+            document.getElementById('testimonialText').innerText = testimonials[i];
             i = (i + 1) % testimonials.length;
         }, 10000);
+    }
+
+    // --- AUTH ---
+    function showLogin() { 
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('login-wrapper').classList.remove('hidden'); 
+        document.getElementById('login-wrapper').style.display = 'flex'; // Explicit show
+        document.querySelector('body').classList.add('app-active');
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function hideLogin() {
+        document.getElementById('login-wrapper').classList.add('hidden');
+        document.getElementById('landing-page').style.display = 'block';
+        document.querySelector('body').classList.remove('app-active');
     }
 
     function handleLogin() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
         const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
-        const valid = users.find(user => user.u === u && user.p === p);
-
-        if (valid) {
-            currentUser = u;
-            localStorage.setItem('nisff_current_user', u);
-            initApp();
-        } else {
-            document.getElementById('loginError').innerText = "Invalid Credentials";
-        }
+        if(users.find(user => user.u === u && user.p === p)) {
+            currentUser = u; localStorage.setItem('nisff_current_user', u); showApp();
+        } else { document.getElementById('loginError').innerText = "Invalid Credentials"; }
     }
 
-    function initApp() {
+    function showApp() {
+        document.getElementById('landing-page').style.display = 'none';
         document.getElementById('login-wrapper').classList.add('hidden');
         document.getElementById('app-main').classList.remove('hidden');
+        document.querySelector('body').classList.add('app-active');
+        document.getElementById('welcomeUser').innerText = `User: ${currentUser}`;
         
-        const userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
-        if (userData.photo) document.getElementById('userAvatarDisplay').src = userData.photo;
+        const data = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
+        if(data.photo) document.getElementById('userAvatarDisplay').src = data.photo;
+        if(data.apiKey) document.getElementById('apiKey').value = data.apiKey;
         
-        ['film', 'dia', 'cine', 'imp', 'yt'].forEach(cat => {
-            updateHistoryUI(cat);
-            updateLimitUI(cat); // Check limits on load
-        });
+        ['film','cine','dia','imp','yt'].forEach(cat => { updateHistoryUI(cat); });
     }
 
-    function logout() {
-        localStorage.removeItem('nisff_current_user');
-        location.reload();
+    function logout() { localStorage.removeItem('nisff_current_user'); location.reload(); }
+
+    // --- ADMIN ---
+    function toggleAdminPanel() {
+        const p = document.getElementById('admin-panel');
+        if(p.style.display==='flex') { p.style.display='none'; return; }
+        const u = prompt("Admin User:"); const pass = prompt("Admin Pass:");
+        if(u===atob(AUTH.u) && pass===atob(AUTH.p)) p.style.display='flex'; else alert("Denied");
+    }
+    function createUser() {
+        const u = document.getElementById('newUser').value; const p = document.getElementById('newPass').value;
+        if(!u || !p) return;
+        const users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
+        users.push({u, p, role:'user'}); localStorage.setItem('nisff_users', JSON.stringify(users)); alert("Created");
     }
 
-    function toggleProfileMenu() {
-        const menu = document.getElementById('profile-menu');
-        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-    }
-    function saveKey() {
-        const key = document.getElementById('apiKey').value;
-        localStorage.setItem('nisff_key', key);
-    }
-    function openPassModal() { document.getElementById('passModal').style.display = 'flex'; toggleProfileMenu(); }
-    function openPhotoModal() { document.getElementById('photoModal').style.display = 'flex'; toggleProfileMenu(); }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
-
-    function saveNewPassword() {
-        const newPass = document.getElementById('newPassInput').value;
-        if (!newPass) return alert("Enter password");
-        let users = JSON.parse(localStorage.getItem('nisff_users') || '[]');
-        const idx = users.findIndex(u => u.u === currentUser);
-        if (idx !== -1) {
-            users[idx].p = newPass;
-            localStorage.setItem('nisff_users', JSON.stringify(users));
-            alert("Updated!"); closeModals();
-        }
-    }
-
-    function savePhoto() {
-        const file = document.getElementById('photoInput').files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = function() {
-            let userData = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
-            userData.photo = reader.result;
-            localStorage.setItem(`nisff_data_${currentUser}`, JSON.stringify(userData));
-            document.getElementById('userAvatarDisplay').src = reader.result;
-            alert("Updated!"); closeModals();
-        }
-        reader.readAsDataURL(file);
-    }
-
+    // --- UI ---
     function openTab(id) {
         document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
@@ -537,258 +533,145 @@
             }
         });
     }
-
-    function clearArea(outId, inId) {
-        if(confirm('Clear contents?')) {
-            document.getElementById(outId).innerText = "";
-            if(inId) document.getElementById(inId).value = "";
-        }
+    function toggleProfileMenu() { const m = document.getElementById('profile-menu'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
+    function saveKey() { localStorage.setItem('nisff_key', document.getElementById('apiKey').value); }
+    function openPassModal() { document.getElementById('passModal').style.display='flex'; toggleProfileMenu(); }
+    function openPhotoModal() { document.getElementById('photoModal').style.display='flex'; toggleProfileMenu(); }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    
+    function saveNewPassword() {
+        const np = document.getElementById('newPassInput').value;
+        let users = JSON.parse(localStorage.getItem('nisff_users'));
+        users.find(u => u.u === currentUser).p = np;
+        localStorage.setItem('nisff_users', JSON.stringify(users)); alert("Saved"); closeModals();
     }
-    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); alert("Copied!"); }
-    function printArea(id) {
-        const content = document.getElementById(id).innerText;
-        const win = window.open('', '', 'height=700,width=900');
-        win.document.write(`<html><head><title>Print</title><style>body{font-family:'Courier New'; white-space: pre-wrap; padding:40px;}</style></head><body>${content}</body></html>`);
-        win.document.close(); win.print();
-    }
-
-    function stripHtml(html) {
-        return html.replace(/<[^>]*>?/gm, ''); 
-    }
-
-    // --- USAGE LIMITS ---
-    function getUsageKey() {
-        const date = new Date().toISOString().split('T')[0];
-        return `nisff_usage_${currentUser}_${date}`;
+    function savePhoto() {
+        const file = document.getElementById('photoInput').files[0];
+        const r = new FileReader();
+        r.onload = function() {
+            let d = JSON.parse(localStorage.getItem(`nisff_data_${currentUser}`) || '{}');
+            d.photo = r.result; localStorage.setItem(`nisff_data_${currentUser}`, JSON.stringify(d));
+            document.getElementById('userAvatarDisplay').src = r.result; alert("Saved"); closeModals();
+        }; r.readAsDataURL(file);
     }
 
-    function getUsage() {
-        const key = getUsageKey();
-        return JSON.parse(localStorage.getItem(key) || '{}');
-    }
-
-    function checkLimit(type) {
-        if(!currentUser) return false;
-        const usage = getUsage();
-        const current = usage[type] || 0;
-        if(current >= LIMITS[type]) {
-            alert(`Daily limit reached for ${type}. Limit: ${LIMITS[type]}`);
-            return false;
-        }
-        return true;
-    }
-
-    function incrementUsage(type) {
-        const key = getUsageKey();
-        const usage = getUsage();
-        usage[type] = (usage[type] || 0) + 1;
-        localStorage.setItem(key, JSON.stringify(usage));
-        updateLimitUI(type);
-    }
-
-    function updateLimitUI(type) {
-        if(!currentUser) return;
-        const usage = getUsage();
-        const left = LIMITS[type] - (usage[type] || 0);
-        const el = document.getElementById(`limit-${type}`);
-        if(el) {
-            el.innerText = `(${left}/${LIMITS[type]} Left)`;
-            el.style.color = left === 0 ? 'var(--error)' : 'var(--text)';
-        }
-    }
-
-    // --- API CALL ---
+    // --- GENERATION ---
+    function strip(html) { return html.replace(/<[^>]*>?/gm, ''); }
     async function callGemini(prompt) {
-        const key = document.getElementById('apiKey').value;
-        if (!key) { alert("Please enter API Key in Profile Menu"); return null; }
-
-        let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
-
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            safetySettings: [
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
-            ]
-        };
-
+        const k = document.getElementById('apiKey').value; if(!k) { alert("Enter Key"); return null; }
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`; // Using 1.5 for stability
         try {
-            let response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            let data = await response.json();
+            const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+            const data = await res.json();
+            return strip(data.candidates[0].content.parts[0].text.replace(/\*\*/g, ""));
+        } catch(e) { alert("Error"); return null; }
+    }
 
-            // FALLBACK
-            if (data.error && (data.error.code === 404 || data.error.message.includes("not found"))) {
-                url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
-                response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                data = await response.json();
-            }
-
-            if (data.error) { alert("Error: " + data.error.message); return null; }
-            if (!data.candidates) { alert("No content."); return null; }
-            
-            return stripHtml(data.candidates[0].content.parts[0].text.replace(/\*\*/g, "")); 
-
-        } catch (e) { alert("Error: " + e.message); return null; }
+    // --- USAGE ---
+    function checkLimit(type) {
+        const key = `nisff_usage_${currentUser}_${new Date().toISOString().split('T')[0]}`;
+        const u = JSON.parse(localStorage.getItem(key) || '{}');
+        if((u[type] || 0) >= LIMITS[type]) { alert("Daily Limit Reached"); return false; }
+        u[type] = (u[type] || 0) + 1; localStorage.setItem(key, JSON.stringify(u)); return true;
     }
 
     // --- HISTORY ---
-    function getHistoryKeyName(category) { return `nisff_hist_${currentUser}_${category}`; }
+    function addHist(cat, txt) {
+        const key = `nisff_hist_${currentUser}_${cat}`;
+        let h = JSON.parse(localStorage.getItem(key) || '[]');
+        h.unshift({ t: new Date().toLocaleTimeString(), c: txt });
+        if(h.length > 10) h.pop();
+        localStorage.setItem(key, JSON.stringify(h)); updateHistoryUI(cat);
+    }
+    function updateHistoryUI(cat) {
+        const s = document.getElementById(`hist-${cat}`);
+        s.innerHTML = '<option value="">Recent</option>';
+        const h = JSON.parse(localStorage.getItem(`nisff_hist_${currentUser}_${cat}`) || '[]');
+        h.forEach((x, i) => { const o = document.createElement('option'); o.value=i; o.text=x.t; s.appendChild(o); });
+    }
+    function restoreHistory(cat) {
+        const idx = document.getElementById(`hist-${cat}`).value; if(idx==="") return;
+        const h = JSON.parse(localStorage.getItem(`nisff_hist_${currentUser}_${cat}`));
+        const map = {'film':'filmOutput','cine':'cineOutput','dia':'diaOutput','imp':'improveOutput','yt':'ytOutput'};
+        document.getElementById(map[cat]).innerText = h[idx].c;
+    }
+    function deleteHistoryItem(cat) {
+        if(!confirm("Delete?")) return;
+        const key = `nisff_hist_${currentUser}_${cat}`;
+        let h = JSON.parse(localStorage.getItem(key)); h.shift();
+        localStorage.setItem(key, JSON.stringify(h)); updateHistoryUI(cat);
+    }
     
-    function addToHistory(category, text) {
-        const key = getHistoryKeyName(category);
-        let hist = JSON.parse(localStorage.getItem(key) || '[]');
-        hist.unshift({ time: new Date().toLocaleTimeString(), full: text });
-        if(hist.length > 10) hist.pop();
-        localStorage.setItem(key, JSON.stringify(hist));
-        updateHistoryUI(category);
+    // --- FUNCTIONS ---
+    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); alert("Copied"); }
+    function clearArea(o, i) { document.getElementById(o).innerText=""; if(i) document.getElementById(i).value=""; }
+    function printArea(id) {
+        const c = document.getElementById(id).innerText;
+        const w = window.open('','','height=600,width=800');
+        w.document.write(`<pre style="white-space:pre-wrap; font-family:monospace">${c}</pre>`); w.print();
     }
 
-    function updateHistoryUI(category) {
-        const key = getHistoryKeyName(category);
-        let hist = JSON.parse(localStorage.getItem(key) || '[]');
-        const select = document.getElementById(`hist-${category}`);
-        while (select.options.length > 1) { select.remove(1); }
-        hist.forEach((item, index) => {
-            const opt = document.createElement('option');
-            opt.value = index; opt.text = item.time;
-            select.appendChild(opt);
-        });
-    }
-
-    function restoreHistory(category) {
-        const select = document.getElementById(`hist-${category}`);
-        const index = select.value;
-        if(index === "") return;
-        const key = getHistoryKeyName(category);
-        let hist = JSON.parse(localStorage.getItem(key));
-        const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'imp': 'improveOutput', 'yt': 'ytOutput' };
-        document.getElementById(idMap[category]).innerText = hist[index].full;
-    }
-
-    function deleteHistoryItem(category) {
-        const select = document.getElementById(`hist-${category}`);
-        const index = select.value;
-        if(index === "") return;
-        if(confirm("Delete item?")) {
-            const key = getHistoryKeyName(category);
-            let hist = JSON.parse(localStorage.getItem(key));
-            hist.splice(index, 1);
-            localStorage.setItem(key, JSON.stringify(hist));
-            const idMap = { 'film': 'filmOutput', 'dia': 'diaOutput', 'cine': 'cineOutput', 'imp': 'improveOutput', 'yt': 'ytOutput' };
-            document.getElementById(idMap[category]).innerText = "";
-            updateHistoryUI(category);
-        }
-    }
-
-    // --- GENERATORS ---
-    function getStrictInstruction(lang) {
-        if(lang === 'English') return "Write entirely in English.";
-        if(lang === 'Hinglish') return "Write in Hinglish (Hindi words written in English alphabet).";
-        return `STRICT LANGUAGE RULE: Output MUST be in **${lang}** using **Native ${lang} Script**. NO English translations.`;
-    }
+    // --- PROMPTS ---
+    function getLangInstr(l) { return `STRICT LANGUAGE: Write entire output in **${l}** using Native Script. NO English unless specified.`; }
 
     async function generateFilm() {
         if(!checkLimit('film')) return;
         const idea = document.getElementById('filmIdea').value;
         const lang = document.getElementById('filmLanguage').value;
-        const genre = document.getElementById('filmGenre').value;
-        const dur = document.getElementById('filmDuration').value;
-
         if(!idea) return alert("Enter Idea");
-        document.getElementById('filmLoader').style.display = 'block';
+        document.getElementById('filmLoader').style.display='block';
         
-        const prompt = `Act as a Professional Screenwriter. Write a Short Film Script.
-        Title: ${idea}. Genre: ${genre}. Duration: ${dur}.
-        ${getStrictInstruction(lang)}
-        Format: Standard Screenplay (Plain Text).`;
-
-        const script = await callGemini(prompt);
-        document.getElementById('filmLoader').style.display = 'none';
+        const p = `Write Short Film Script. Title: ${idea}. Genre: ${document.getElementById('filmGenre').value}. Duration: ${document.getElementById('filmDuration').value}. ${getLangInstr(lang)} Format: Standard Screenplay.`;
+        const res = await callGemini(p);
+        document.getElementById('filmLoader').style.display='none';
         
-        if(script) {
-            incrementUsage('film');
-            document.getElementById('filmOutput').innerText = script;
-            addToHistory('film', script);
-            
-            // Auto Trigger Setup
-            document.getElementById('cineContext').value = `Script: ${idea}`;
-            document.getElementById('cineLanguage').value = lang;
-            
-            autoGenerateCinematography(idea, genre, lang);
-        }
-    }
-
-    async function autoGenerateCinematography(idea, genre, lang) {
-        // DOES NOT CHECK LIMIT (Free with script)
-        const btn = document.getElementById('btn-cinematography');
-        const res = await callGemini(`Create a Shot List for film "${idea}" (${genre}). ${getStrictInstruction(lang)}`);
         if(res) {
-            document.getElementById('cineOutput').innerText = res;
-            addToHistory('cine', res);
-            btn.classList.add('has-data');
+            document.getElementById('filmOutput').innerText = res; addHist('film', res);
+            document.getElementById('cineContext').value = `Script: ${idea}`; document.getElementById('cineLanguage').value = lang;
+            autoGenCine(idea, lang);
         }
     }
 
-    async function generateDialogue() {
-        if(!checkLimit('dia')) return;
-        const ctx = document.getElementById('diaContext').value;
-        const lang = document.getElementById('diaLanguage').value;
-        document.getElementById('diaLoader').style.display = 'block';
-        const res = await callGemini(`Write movie dialogues for: ${ctx}. ${getStrictInstruction(lang)}`);
-        document.getElementById('diaLoader').style.display = 'none';
-        if(res) { 
-            incrementUsage('dia');
-            document.getElementById('diaOutput').innerText = res; 
-            addToHistory('dia', res); 
-        }
+    async function autoGenCine(idea, lang) {
+        const res = await callGemini(`Shot list for film "${idea}". ${getLangInstr(lang)}`);
+        if(res) { document.getElementById('cineOutput').innerText = res; addHist('cine', res); document.getElementById('btn-cinematography').classList.add('has-data'); }
     }
 
     async function generateCinematography() {
         if(!checkLimit('cine')) return;
-        const ctx = document.getElementById('cineContext').value;
-        const lang = document.getElementById('cineLanguage').value;
-        document.getElementById('cineLoader').style.display = 'block';
-        const res = await callGemini(`Create Shot List for: ${ctx}. ${getStrictInstruction(lang)}`);
-        document.getElementById('cineLoader').style.display = 'none';
-        if(res) { 
-            incrementUsage('cine');
-            document.getElementById('cineOutput').innerText = res; 
-            addToHistory('cine', res); 
-        }
+        const ctx = document.getElementById('cineContext').value; const lang = document.getElementById('cineLanguage').value;
+        document.getElementById('cineLoader').style.display='block';
+        const res = await callGemini(`Shot list for: ${ctx}. ${getLangInstr(lang)}`);
+        document.getElementById('cineLoader').style.display='none';
+        if(res) { document.getElementById('cineOutput').innerText = res; addHist('cine', res); }
+    }
+
+    async function generateDialogue() {
+        if(!checkLimit('dia')) return;
+        const ctx = document.getElementById('diaContext').value; const lang = document.getElementById('diaLanguage').value;
+        document.getElementById('diaLoader').style.display='block';
+        const res = await callGemini(`Write dialogue for: ${ctx}. ${getLangInstr(lang)}`);
+        document.getElementById('diaLoader').style.display='none';
+        if(res) { document.getElementById('diaOutput').innerText = res; addHist('dia', res); }
     }
 
     async function improveScript() {
         if(!checkLimit('imp')) return;
-        const input = document.getElementById('improveInput').value;
-        const type = document.getElementById('improveType').value;
-        const lang = document.getElementById('improveLang').value;
-        if(!input) return alert("Paste script first");
-        document.getElementById('improveLoader').style.display = 'block';
-        const res = await callGemini(`Improve this script based on: ${type}. Rewrite in **${lang}** (Native Script). \n\n${input}`);
-        document.getElementById('improveLoader').style.display = 'none';
-        if(res) { 
-            incrementUsage('imp');
-            document.getElementById('improveOutput').innerText = res; 
-            addToHistory('imp', res); 
-        }
+        const inp = document.getElementById('improveInput').value; const lang = document.getElementById('improveLang').value;
+        document.getElementById('improveLoader').style.display='block';
+        const res = await callGemini(`Improve script: ${document.getElementById('improveType').value}. Rewrite in ${lang}. \n${inp}`);
+        document.getElementById('improveLoader').style.display='none';
+        if(res) { document.getElementById('improveOutput').innerText = res; addHist('imp', res); }
     }
 
     async function generateYouTube() {
         if(!checkLimit('yt')) return;
-        const topic = document.getElementById('ytTopic').value;
-        const lang = document.getElementById('ytLanguage').value;
-        document.getElementById('ytLoader').style.display = 'block';
-        const res = await callGemini(`Write YouTube script about: ${topic}. ${getStrictInstruction(lang)}`);
-        document.getElementById('ytLoader').style.display = 'none';
-        if(res) { 
-            incrementUsage('yt');
-            document.getElementById('ytOutput').innerText = res; 
-            addToHistory('yt', res); 
-        }
+        const t = document.getElementById('ytTopic').value; const lang = document.getElementById('ytLanguage').value;
+        document.getElementById('ytLoader').style.display='block';
+        const res = await callGemini(`YouTube Script: ${t}. ${getLangInstr(lang)}`);
+        document.getElementById('ytLoader').style.display='none';
+        if(res) { document.getElementById('ytOutput').innerText = res; addHist('yt', res); }
     }
-
 </script>
 </body>
 </html>
